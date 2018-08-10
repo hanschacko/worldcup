@@ -10,7 +10,7 @@ analytics. There are many reasons why national team soccer analytics trails othe
 like baseball basketball and American football. For example, many national team matches are
 against regional opponents as part of regional tournaments or world cup qualifiers and a
 disproportional amount of the available data is from segmented sources therefore, compiling
-something as simple as a relative ranking among all nations can be quite challenging.
+something as simple as a relative ranking among all nations can be quite challenging.<br>
 FIFA’s response to this problem was the introduction of an official FIFA ranking for each
 member nation beginning in December 1992. The initial rankings were met with criticism and
 significant changes were implemented in January 1999 and July 2006. The initial ranking
@@ -22,34 +22,22 @@ away, the importance of the match and regional strength which enabled match lose
 points and a fixed number of points were no longer necessarily awarded for a victory or a draw.
 The rankings were again met with criticism and in 2006, updates were introduced to reduce the
 evaluation period to 4 years vs. 8 years, revise the match importance parameters, and ignore the
-goals scored and home or away advantage.
+goals scored and home or away advantage.<br>
 Additionally, it was recently announced that following the 2018 World Cup, the FIFA world
 rankings would adopt an Elo based ranking system which considers many factors including the
 teams previous rating, the status (in order of importance: World Cup/Olympic games, continental
 championship and intercontinental tournaments, world cup qualifiers, all other tournaments, and
 lastly friendlies), goal difference, result, and expected result of the match. Since this ranking has 
 not yet been introduced the basis of this analysis will compare the results to the pre-2018
-rankings.
+rankings.<br>
 
-###History of FIFA Ranking System
+History of FIFA rankings<br>
 
 Original Rankings in 1993 | 1999 Ranking Updates | 2006 Ranking Updates
 --------------------------|----------------------|---------------------
-- 3 points for a win
-- 1 point for a draw |
+3 points for a win <br> 1 point for a draw | Point scale factored 10x <br> Considered # of goals scored <br> and conceded,home/away, importance <br>of match, and regional strength |
+Reduced evaluation period <br>from 8 to 4 years
 
-- Point scale factored 10x
-- Considered # of goals
-scored and conceded,
-home/away, importance of
-match, and regional
-strength |
-- Reduced evaluation period
-from 8 to 4 years
-- Revised match importance
-parameters
-- Ignores goals scored and
-home or away advantage
 
 
 # Project Goal
