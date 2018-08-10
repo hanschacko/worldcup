@@ -4,6 +4,8 @@ Bruno Janota and Hans Chacko #12
 
 # Project Statement and Background
 
+The goal of this project will be to leverage various sources of team and player data in addition to historical match results to construct a 2018 FIFA World Cup prediction model and evaluate those models against the baseline of predictions from simply incorporating FIFA ranking as a measure of team strength. <br>
+
 The FIFA World Cup is one of the most prominent sporting events in the world yet relative to
 other major sports, football/futbol/soccer analytics generally lags the state of the art for sports
 analytics. There are many reasons why national team soccer analytics trails other major sports
@@ -11,6 +13,7 @@ like baseball basketball and American football. For example, many national team 
 against regional opponents as part of regional tournaments or world cup qualifiers and a
 disproportional amount of the available data is from segmented sources therefore, compiling
 something as simple as a relative ranking among all nations can be quite challenging.<br>
+
 FIFA’s response to this problem was the introduction of an official FIFA ranking for each
 member nation beginning in December 1992. The initial rankings were met with criticism and
 significant changes were implemented in January 1999 and July 2006. The initial ranking
@@ -23,6 +26,7 @@ points and a fixed number of points were no longer necessarily awarded for a vic
 The rankings were again met with criticism and in 2006, updates were introduced to reduce the
 evaluation period to 4 years vs. 8 years, revise the match importance parameters, and ignore the
 goals scored and home or away advantage.<br>
+
 Additionally, it was recently announced that following the 2018 World Cup, the FIFA world
 rankings would adopt an Elo based ranking system which considers many factors including the
 teams previous rating, the status (in order of importance: World Cup/Olympic games, continental
@@ -38,13 +42,6 @@ Original Rankings in 1993 | 1999 Ranking Updates | 2006 Ranking Updates
 3 points for a win <br> 1 point for a draw | Point scale factored 10x <br> Considered # of goals scored <br> and conceded,home/away, importance <br>of match, and regional strength |
 Reduced evaluation period <br>from 8 to 4 years
 
-
-
-# Project Goal
-The goal of this project will be to leverage various sources of team and player data in addition to
-historical match results to construct a 2018 FIFA World Cup prediction model and evaluate those
-models against the baseline of predictions from simply incorporating FIFA ranking as a measure
-of team strength.
 
 # Project Overview
 The goal of this project will be to leverage various sources of team/player data, historical international match results, historical FIFA rankings, and betting odds to construct a 2018 FIFA World Cup prediction model. The model will predict a win, loss, or draw match outcome for historical international matches from 1993 to 2018 divided into a training and testing set and evaluate those predictions against the baseline of predictions from simply incorporating FIFA ranking as a naïve measure of team strength (i.e. the team with a higher ranking should win). In addition to predicting historical international matches, the classification model will also be used to predict the outcome of the 2018 FIFA World Cup.
