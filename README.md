@@ -92,7 +92,11 @@ country_df = pd.read_csv('WorldCountryData.csv')
 country_df = pd.get_dummies(country_df, columns=['Region','IncomeGroup'], drop_first=True)
 country_df.head()
 ```
-![Country Data](/Images/CountryData.PNG)
+
+![Historical Results](/Images/HistoricalResults.PNG)
+
+
+![World Country Data](/Images/WorldCountryData.PNG)
 
 ### Comments
 1. Get ranks for every day
