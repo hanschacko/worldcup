@@ -64,7 +64,7 @@ fifaRank_df = fifaRank_df.replace({"IR Iran": "Iran"})
 fifaRank_df['rank_date'] = pd.to_datetime(fifaRank_df['rank_date'])
 fifaRank_df.head()
 ```
-![Historical Rankings](/Images/HistoricalRankings.png)
+![Historical Rankings](/Images/HistoricalRankings.PNG)
 
 ### Comments
 1. Load international match results (1872-2018) dataset into pandas dataframe
@@ -81,7 +81,7 @@ results_df =  results_df.replace({'Germany DR': 'Germany', 'China': 'China PR'})
 results_df['date'] = pd.to_datetime(results_df['date'])
 ```
 
-![Historical Results](/Images/HistoricalResults.png)
+![Historical Results](/Images/HistoricalResults.PNG)
 
 ### Comments
 1. Load country region and income group data into pandas dataframe
@@ -92,7 +92,7 @@ country_df = pd.read_csv('WorldCountryData.csv')
 country_df = pd.get_dummies(country_df, columns=['Region','IncomeGroup'], drop_first=True)
 country_df.head()
 ```
-![Country Data](/Images/CountryData.png)
+![Country Data](/Images/CountryData.PNG)
 
 ### Comments
 1. Get ranks for every day
