@@ -1,7 +1,7 @@
 ## CS-109A Data Science Final project
-Harvard University
-Summer 2018
-Team: Bruno Janota and Hans Chacko #12
+Harvard University <br>
+Summer 2018 <br>
+Team: Bruno Janota and Hans Chacko #12 <br>
 
 
 # Project Statement and Background
@@ -64,7 +64,7 @@ fifaRank_df = fifaRank_df.replace({"IR Iran": "Iran"})
 fifaRank_df['rank_date'] = pd.to_datetime(fifaRank_df['rank_date'])
 fifaRank_df.head()
 ```
-![Historical Ranking](/Images/HistoricalRanking.png)
+![Historical Rankings](/Images/HistoricalRankings.png)
 
 ### Comments
 1. Load international match results (1872-2018) dataset into pandas dataframe
