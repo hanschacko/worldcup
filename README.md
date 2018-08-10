@@ -50,8 +50,130 @@ The knockout stages of the world cup will be simulated 1000 times to determine t
 
 # Part 1 : Baseline Model
 ## Load, Clean and Merge Data
+
+### Comments
+Load historical FIFA rankings (1993-present) dataset into pandas dataframe
+```python
+# load historical FIFA rankings (1993-present) dataset into pandas dataframe
+fifaRank_df = pd.read_csv('FifaRanking1993to2018_Tadhg Fitzgerald.csv')
+fifaRank_df = fifaRank_df.loc[:,['rank', 'country_full', 'country_abrv', 'rank_date', 'total_points', 'previous_points',
+                                 'cur_year_avg_weighted', 'two_year_ago_weighted', 'three_year_ago_weighted']]
+fifaRank_df = fifaRank_df.replace({"IR Iran": "Iran"})
+fifaRank_df['rank_date'] = pd.to_datetime(fifaRank_df['rank_date'])
+```
+
+### Comments
+1. Load international match results (1872-2018) dataset into pandas dataframe
+2. Load country region and income group data into pandas dataframe
+3. Convert categorical variables using one-hot encoding
+```python
+results_df = pd.read_csv('InternationalResultsFrom1993to2018.csv')
+results_df =  results_df.replace({'Germany DR': 'Germany', 'China': 'China PR'})
+results_df['date'] = pd.to_datetime(results_df['date'])
+
+results_df = pd.read_csv('InternationalResultsFrom1993to2018.csv')
+results_df =  results_df.replace({'Germany DR': 'Germany', 'China': 'China PR'})
+results_df['date'] = pd.to_datetime(results_df['date'])
+
+country_df = pd.read_csv('WorldCountryData.csv')
+
+country_df = pd.get_dummies(country_df, columns=['Region','IncomeGroup'], drop_first=True)
+```
+
+### Comments
+1. Get ranks for every day
+2. Join the ranks
+3. Join region and income group data
+
+```python
+fifaRank_df = fifaRank_df.set_index(['rank_date'])\
+                        .groupby(['country_full'], group_keys=False)\
+                        .resample('D').first()\
+                        .fillna(method='ffill')\
+                        .reset_index()
+
+results_df = results_df.merge(fifaRank_df, 
+                        left_on=['date', 'home_team'], 
+                        right_on=['rank_date', 'country_full'])
+results_df = results_df.merge(fifaRank_df, 
+                        left_on=['date', 'away_team'], 
+                        right_on=['rank_date', 'country_full'], 
+                        suffixes=('_home', '_away'))
+
+results_df = results_df.merge(country_df, 
+                        left_on=['home_team'], 
+                        right_on=['ShortName'])
+results_df = results_df.merge(country_df, 
+                        left_on=['away_team'], 
+                        right_on=['ShortName'], 
+                        suffixes=('_home', '_away'))
+
+```
+
+### Comments
+Generate additional features
+
+```python
+results_df['rank_difference'] = results_df['rank_home'] - results_df['rank_away']
+results_df['average_rank'] = (results_df['rank_home'] + results_df['rank_away'])/2
+results_df['score_difference'] = results_df['home_score'] - results_df['away_score']
+results_df['is_stake'] = results_df['tournament'] != 'Friendly'
+results_df['total_goals'] = results_df['home_score'] + results_df['away_score'] 
+results_df['year'] = results_df['date'].dt.year
+
+winner = []
+result = []
+for i in range (len(results_df['home_team'])):
+    if results_df['home_score'][i] > results_df['away_score'][i]:
+        winner.append(results_df['home_team'][i])
+        result.append(1.0)
+    elif results_df['home_score'][i] < results_df ['away_score'][i]:
+        winner.append(results_df['away_team'][i])
+        result.append(0.0)
+    else:
+        winner.append('Draw')
+        result.append(0.5)
+
+results_df['winning_team'] = winner
+results_df['result'] = result
+
+```
+
+### Comments
+1. Plot International Matches played between 1993-2018: 14997
+2. Total International Matches played by 2018 World Cup teams between 1993-2018: 14997
+
+```python
+plt.figure(figsize=(12, 8), dpi= 80)
+sns.set(style='darkgrid')
+sns.countplot(x='result', data = results_df)
+plt.xticks(range(3), ['Loss','Tie','Win'])
+plt.title('Home Team International Match Outcomes', fontsize=14)
+plt.show()
+```
+
 ![Home Team International Matches Outcomes](/Images/HomeTeamInternationalMatchOutcomes.png)
+
+### Comments
+Plot Number of International Matches per Year
+
+```python
+games_per_year = results_df.groupby(['year'])['year'].count()
+years = ['1993', '1994', '1995', '1996', '1997', '1998', '1999', '2000', '2001', '2002', '2003',
+       '2004', '2005', '2006', '2007', '2008', '2009', '2010', '2011', '2012', '2013', '2014',
+       '2015', '2016', '2017', '2018']
+plt.figure(figsize=(12, 8), dpi= 80)
+plt.bar(range(len(games_per_year)), games_per_year)
+plt.xticks(range(len(games_per_year)), years, rotation = 90)
+plt.title('Number of International Matches per Year', fontsize=14)
+plt.xlabel('Year', fontsize=12)
+plt.ylabel('# of Matches', fontsize=12)
+plt.show()
+```
+
 ![International Matches Per Year](/Images/IntlMatchesYear.png)
+
+
 ## Native Model based on FIFA Ranking Only
 ![Alt Text](url)
 ## Visualize Subset of Data for Portugal Matches Only
