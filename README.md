@@ -93,9 +93,6 @@ country_df = pd.get_dummies(country_df, columns=['Region','IncomeGroup'], drop_f
 country_df.head()
 ```
 
-![Historical Results](/Images/HistoricalResults.PNG)
-
-
 ![World Country Data](/Images/WorldCountryData.PNG)
 
 ### Comments
