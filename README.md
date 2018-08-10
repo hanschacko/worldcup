@@ -1,3 +1,6 @@
+## CS-109A Data Science Final project
+Bruno Janota and Hans Chacko #12
+
 # Project Goal
 The goal of this project will be to leverage various sources of team and player data in addition to
 historical match results to construct a 2018 FIFA World Cup prediction model and evaluate those
