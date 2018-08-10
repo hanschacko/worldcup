@@ -176,12 +176,149 @@ plt.show()
 
 
 ## Naive Model based on FIFA Ranking Only
-![Alt Text](url)
+
+### Comments
+1. Accuracy of FIFA Ranking at Predicting Winner: 21.88%
+```python
+results_df['fifa_correct_withDraws'] = ((results_df.home_score >= results_df.away_score) & (results_df.rank_home > results_df.rank_away)) | ((results_df.away_score >= results_df.home_score) & (results_df.rank_away > results_df.rank_home))
+results_df['fifa_correct'] = ((results_df.home_score > results_df.away_score) & (results_df.rank_home > results_df.rank_away)) | ((results_df.away_score > results_df.home_score) & (results_df.rank_away > results_df.rank_home))
+
+print('Accuracy of FIFA Ranking at Predicting Winner: {}%'
+      .format(round(results_df.fifa_correct.sum()/results_df.fifa_correct.count()*100, 2)))
+```
+
+### Comments
+1. Accuracy of FIFA Ranking at Predicting Winner (ignoring draws): 28.9%
+
+```python
+no_Draws_df = results_df.loc[results_df['result'] != 0.5].copy()
+no_Draws_df['fifa_correct_withDraws'] = ((no_Draws_df.home_score >= no_Draws_df.away_score) & (no_Draws_df.rank_home > no_Draws_df.rank_away)) | ((no_Draws_df.away_score >= no_Draws_df.home_score) & (no_Draws_df.rank_away > no_Draws_df.rank_home))
+no_Draws_df['fifa_correct'] = ((no_Draws_df.home_score > no_Draws_df.away_score) & (no_Draws_df.rank_home > no_Draws_df.rank_away)) | ((no_Draws_df.away_score > no_Draws_df.home_score) & (no_Draws_df.rank_away > no_Draws_df.rank_home))
+print('Accuracy of FIFA Ranking at Predicting Winner (ignoring draws): {}%'
+      .format(round(no_Draws_df.fifa_correct.sum()/no_Draws_df.fifa_correct.count()*100, 2)))
+```
 
 ## Visualize Subset of Data for Portugal Matches Only
+1. Let's work with a subset of the data that includes games played by Portugal
+2. Visualize Portugal game outcomes
+
+### Comments
+```python
+portugal = results_df[(results_df['home_team'] == 'Portugal') | (results_df['away_team'] == 'Portugal')]
+
+wins = []
+for row in portugal['winning_team']:
+    if row != 'Portugal' and row != 'Draw':
+        wins.append('Loss')
+    elif row == 'Draw':
+        wins.append('Draw')
+    else:
+        wins.append('Win')
+        
+winsdf= pd.DataFrame(wins, columns=['Portugal Results'])
+
+plt.figure(figsize=(12, 8), dpi= 80)
+sns.set(style='darkgrid')
+sns.countplot(x='Portugal Results', data=winsdf)
+```
 ![Portugal Matches](/Images/Portugal.png))
 
 ## Evaluate Baseline Decision Tree Model 
+
+### Comments
+1. Remove features without predictive value or not known prior to game start
+2. Split training set in features/labels
+3. Split the data into training and testing sets
+4. Show the number of observations for the test and training dataframes
+```python
+no_draw_train_df = results_df[results_df['result'] != 0.5]
+
+train_df = no_draw_train_df[['rank_home','rank_away','neutral','previous_points_home','cur_year_avg_weighted_home',
+                     'two_year_ago_weighted_home','three_year_ago_weighted_home','previous_points_away',
+                     'cur_year_avg_weighted_away','two_year_ago_weighted_away','three_year_ago_weighted_away',
+                     'rank_difference','average_rank','is_stake','result']]
+train_features, test_features, train_labels, test_labels = train_test_split(features, labels, test_size = 0.25, 
+                                                                            random_state = 42)
+print('Number of observations in the training data:', len(train_labels))
+print('Number of observations in the test data:',len(test_labels))
+
+```
+Number of observations in the training data: 8513
+Number of observations in the test data: 2838
+
+### Comments
+1. Determine best tree depth  
+2. Plot classification accuracy vs tree depth
+
+```python
+tree_depth = list(range(1,25))
+
+cv_scores_mean = []
+cv_scores_std = []
+for depth in tree_depth:
+    baselineModel = DecisionTreeClassifier(max_depth=depth)
+    scores = cross_val_score(baselineModel, train_features, train_labels, cv=5, scoring='accuracy')
+    cv_scores_mean.append(scores.mean())
+    cv_scores_std.append(scores.std())
+    
+# determining best tree depth
+optimal_depth = tree_depth[cv_scores_mean.index(max(cv_scores_mean))]
+print('The optimal tree depth is: {}'.format(optimal_depth))
+
+# plot classification accuracy vs tree depth
+plt.rcParams['figure.figsize'] = (10,8)
+plt.plot(tree_depth, cv_scores_mean)
+plt.fill_between(tree_depth, (np.array(cv_scores_mean) - 2*np.array(cv_scores_std)), 
+                 (np.array(cv_scores_mean) + 2*np.array(cv_scores_std)), color = [0.7, 0.7, 0.7], alpha = 0.5)
+plt.title('Decision Tree Classification Accuracy vs. Tree Depth (with +/- 2 sd band)')
+plt.xlabel('Tree Depth')
+plt.ylabel('Classification Accuracy')
+plt.show()
+```
+The optimal tree depth is: 5
+
+![Baseline Tree](/Images/TreeDepth.png)
+
+### Comments
+1. Use cross-validation to build baseline model
+
+```python
+baselineModel = DecisionTreeClassifier(max_depth=optimal_depth).fit(train_features, train_labels)
+
+print('Decision Tree Classifier (FIFA rank only):')
+print('Classification Accuracy on training set: {}%'.format(round(baselineModel.score(train_features, train_labels,)*100, 2)))
+print('Classification Accuracy on testing set: {}%\n'.format(round(baselineModel.score(test_features, test_labels,)*100, 2)))
+```
+Decision Tree Classifier (FIFA rank only):
+Classification Accuracy on training set: 75.17%
+Classification Accuracy on testing set: 74.21%
+
+### Comments
+1. View the decision tree for baseline model
+```python
+from sklearn.externals.six import StringIO  
+from IPython.display import Image  
+from sklearn.tree import export_graphviz
+import pydotplus
+import os
+import sys
+
+# Fix pydotplus error that it can't find Graphviz executables from:
+# https://stackoverflow.com/questions/42235431/ipython-3-5-graphvizs-executables-not-found-after-installing-graphviz-and-pydot
+def conda_fix(graph):
+    path = os.path.join(sys.base_exec_prefix, "Library", "bin", "graphviz")
+    paths = ("dot", "twopi", "neato", "circo", "fdp")
+    paths = {p: os.path.join(path, "{}.exe".format(p)) for p in paths}
+    graph.set_graphviz_executables(paths)
+
+dot_data = StringIO()
+export_graphviz(baselineModel, out_file=dot_data, filled=True, rounded=True, special_characters=True)
+graph = pydotplus.graph_from_dot_data(dot_data.getvalue()) 
+conda_fix(graph)
+
+# View the decision tree for baseline model
+Image(graph.create_png())
+```
 ![Baseline Tree](/Images/BaselineTree.png)
 
 # Part 2 : Developing Model with Elo Rating
