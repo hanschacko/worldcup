@@ -52,7 +52,7 @@ The knockout stages of the world cup will be simulated 1000 times to determine t
 ## Load, Clean and Merge Data
 
 ### Comments
-Load historical FIFA rankings (1993-present) dataset into pandas dataframe
+1. Load historical FIFA rankings (1993-present) dataset into pandas dataframe
 ```python
 # load historical FIFA rankings (1993-present) dataset into pandas dataframe
 fifaRank_df = pd.read_csv('FifaRanking1993to2018_Tadhg Fitzgerald.csv')
@@ -66,6 +66,7 @@ fifaRank_df['rank_date'] = pd.to_datetime(fifaRank_df['rank_date'])
 1. Load international match results (1872-2018) dataset into pandas dataframe
 2. Load country region and income group data into pandas dataframe
 3. Convert categorical variables using one-hot encoding
+
 ```python
 results_df = pd.read_csv('InternationalResultsFrom1993to2018.csv')
 results_df =  results_df.replace({'Germany DR': 'Germany', 'China': 'China PR'})
