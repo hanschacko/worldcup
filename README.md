@@ -174,10 +174,12 @@ plt.show()
 ![International Matches Per Year](/Images/IntlMatchesYear.png)
 
 
-## Native Model based on FIFA Ranking Only
+## Naive Model based on FIFA Ranking Only
 ![Alt Text](url)
+
 ## Visualize Subset of Data for Portugal Matches Only
 ![Portugal Matches](/Images/Portugal.png))
+
 ## Evaluate Baseline Decision Tree Model 
 ![Baseline Tree](/Images/BaselineTree.png)
 
