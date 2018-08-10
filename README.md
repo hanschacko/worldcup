@@ -1,5 +1,7 @@
 ## CS-109A Data Science Final project
-Bruno Janota and Hans Chacko #12
+Harvard University
+Summer 2018
+Team: Bruno Janota and Hans Chacko #12
 
 
 # Project Statement and Background
@@ -60,26 +62,37 @@ fifaRank_df = fifaRank_df.loc[:,['rank', 'country_full', 'country_abrv', 'rank_d
                                  'cur_year_avg_weighted', 'two_year_ago_weighted', 'three_year_ago_weighted']]
 fifaRank_df = fifaRank_df.replace({"IR Iran": "Iran"})
 fifaRank_df['rank_date'] = pd.to_datetime(fifaRank_df['rank_date'])
+fifaRank_df.head()
 ```
+![Historical Ranking](/Images/HistoricalRanking.png)
 
 ### Comments
 1. Load international match results (1872-2018) dataset into pandas dataframe
-2. Load country region and income group data into pandas dataframe
-3. Convert categorical variables using one-hot encoding
+
 
 ```python
 results_df = pd.read_csv('InternationalResultsFrom1993to2018.csv')
 results_df =  results_df.replace({'Germany DR': 'Germany', 'China': 'China PR'})
 results_df['date'] = pd.to_datetime(results_df['date'])
+results_df.head()
 
 results_df = pd.read_csv('InternationalResultsFrom1993to2018.csv')
 results_df =  results_df.replace({'Germany DR': 'Germany', 'China': 'China PR'})
 results_df['date'] = pd.to_datetime(results_df['date'])
-
-country_df = pd.read_csv('WorldCountryData.csv')
-
-country_df = pd.get_dummies(country_df, columns=['Region','IncomeGroup'], drop_first=True)
 ```
+
+![Historical Results](/Images/HistoricalResults.png)
+
+### Comments
+1. Load country region and income group data into pandas dataframe
+2. Convert categorical variables using one-hot encoding
+
+```python
+country_df = pd.read_csv('WorldCountryData.csv')
+country_df = pd.get_dummies(country_df, columns=['Region','IncomeGroup'], drop_first=True)
+country_df.head()
+```
+![Country Data](/Images/CountryData.png)
 
 ### Comments
 1. Get ranks for every day
@@ -303,8 +316,6 @@ import pydotplus
 import os
 import sys
 
-# Fix pydotplus error that it can't find Graphviz executables from:
-# https://stackoverflow.com/questions/42235431/ipython-3-5-graphvizs-executables-not-found-after-installing-graphviz-and-pydot
 def conda_fix(graph):
     path = os.path.join(sys.base_exec_prefix, "Library", "bin", "graphviz")
     paths = ("dot", "twopi", "neato", "circo", "fdp")
