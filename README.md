@@ -35,13 +35,6 @@ lastly friendlies), goal difference, result, and expected result of the match. S
 not yet been introduced the basis of this analysis will compare the results to the pre-2018
 rankings.<br>
 
-History of FIFA rankings<br>
-
-Original Rankings in 1993 | 1999 Ranking Updates | 2006 Ranking Updates
---------------------------|----------------------|---------------------
-3 points for a win <br> 1 point for a draw | Point scale factored 10x <br> Considered # of goals scored <br> and conceded,home/away, importance <br>of match, and regional strength |
-Reduced evaluation period <br>from 8 to 4 years
-
 
 # Project Overview
 The goal of this project will be to leverage various sources of team/player data, historical international match results, historical FIFA rankings, and betting odds to construct a 2018 FIFA World Cup prediction model. The model will predict a win, loss, or draw match outcome for historical international matches from 1993 to 2018 divided into a training and testing set and evaluate those predictions against the baseline of predictions from simply incorporating FIFA ranking as a naïve measure of team strength (i.e. the team with a higher ranking should win). In addition to predicting historical international matches, the classification model will also be used to predict the outcome of the 2018 FIFA World Cup.
