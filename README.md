@@ -1211,8 +1211,8 @@ else:
 
 2018 World Cup Final<br>
 
-Argentina vs. Colombia<br>
-Argentina wins in OT/PK<br>
+Argentina vs. Colombia<br><br>
+**Argentina wins in OT/PK**<br>
 
 
 # Literature Review
