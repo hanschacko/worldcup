@@ -7,7 +7,7 @@ Team #12: Bruno Janota and Hans Chacko  <br>
 [Project Statement and Background](#project-statement-and-background)<br>
 [Project Overview](#project-overview)<br>
 [Part 1: Baseline Model](#part-1-baseline-model)<br>
-[Part 2: Developing Model with Elo Ranking](#elo-ranking-system)<br>
+[Part 2: Elo Ranking System](#elo-ranking-system)<br>
 [Part 3: Ensemble Models](#part-3-ensemble-models)<br>
 [Part 4: Predicting the 2018 World Cup](#part-4-predicting-the-2018-world-cup)<br>
 
@@ -342,7 +342,6 @@ Image(graph.create_png())
 ```
 ![Baseline Tree](/Images/BaselineTree.png)
 
-# Part 2: Developing Model with Elo Ranking
 ## Elo Ranking System
 The Elo rating system is a method for calculating the relative skill levels of teams (or players) in zero-sum games. From Wikipedia, a team's Elo rating as applied to our data set is represented by a number which increases or decreases depending on the outcome of matches between international teams. After every game, the winning team takes points from the losing one. The difference between the ratings of the winner and loser determines the total number of points gained or lost after a game. In a series of games between a high-rated team and a low-rated team, the high-rated team is expected to score more wins. If the high-rated team wins, then only a few rating points will be taken from the low-rated team. However, if the lower rated team scores an upset win, many rating points will be transferred. The lower rated team will also gain a few points from the higher rated team in the event of a draw. This means that this rating system is self-correcting. A team whose rating is too low should, in the long run, do better than the rating system predicts, and thus gain rating points until the rating reflects their true playing strength. The elo function that we used resembles the Elo World Ranking which is defined below:
 
