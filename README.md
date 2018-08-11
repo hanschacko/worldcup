@@ -6,10 +6,10 @@ Team: Bruno Janota and Hans Chacko #12 <br>
 
 [Project Statement and Background](#project-statement-and-background)<br>
 [Project Overview](#project-overview)<br>
-[Part 1: Baseline Model](#part1-baseline-model)<br>
+[Part 1: Baseline Model](#part-1-baseline-model)<br>
 [Part 2: Developing Model with Elo Ranking](#part-2-developing-model-with-elo-ranking)<br>
 [Part 3: Ensemble Models](#part-3-ensemble-models)<br>
-[Part 4: Predicting the 2018 World Cup](#part-4predicting-the-2018-world-cup)<br>
+[Part 4: Predicting the 2018 World Cup](#part-4-predicting-the-2018-world-cup)<br>
 
 
 Part 2: Developing Model with Elo Ranking
