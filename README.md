@@ -12,8 +12,6 @@ Team: Bruno Janota and Hans Chacko #12 <br>
 [Part 4: Predicting the 2018 World Cup](#part-4-predicting-the-2018-world-cup)<br>
 
 
-Part 2: Developing Model with Elo Ranking
-
 # Project Statement and Background
 
 The goal of this project will be to leverage various sources of team and player data in addition to historical match results to construct a 2018 FIFA World Cup prediction model and evaluate those models against the baseline of predictions from simply incorporating FIFA ranking as a measure of team strength. <br>
