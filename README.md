@@ -14,7 +14,9 @@ Team #12: Bruno Janota and Hans Chacko  <br>
 
 # Background
 
-The goal of this project will be to leverage various sources of team and player data in addition to historical match results to construct a 2018 FIFA World Cup prediction model and evaluate those models against the baseline of predictions from simply incorporating FIFA ranking as a measure of team strength. <br>
+The goal of this project will be to leverage various sources of team and player data in addition to 
+historical match results to construct a 2018 FIFA World Cup prediction model and evaluate those models 
+against the baseline of predictions from simply incorporating FIFA ranking as a measure of team strength. <br>
 
 The FIFA World Cup is one of the most prominent sporting events in the world yet relative to
 other major sports, football/futbol/soccer analytics generally lags the state of the art for sports
@@ -201,7 +203,8 @@ plt.show()
 ## Naive Model based on FIFA Ranking Only
 
 ### Comments
-1. Accuracy of FIFA Ranking at Predicting Winner: 21.88%
+1. Accuracy of FIFA Ranking at Predicting Winner: 21.88%<br>
+
 ```python
 results_df['fifa_correct_withDraws'] = ((results_df.home_score >= results_df.away_score) & (results_df.rank_home > results_df.rank_away)) | ((results_df.away_score >= results_df.home_score) & (results_df.rank_away > results_df.rank_home))
 results_df['fifa_correct'] = ((results_df.home_score > results_df.away_score) & (results_df.rank_home > results_df.rank_away)) | ((results_df.away_score > results_df.home_score) & (results_df.rank_away > results_df.rank_home))
@@ -489,8 +492,8 @@ plt.show()
 ![Elo6](/Images/elo6.PNG)
 
 ### Comments
-1. Number of Upsets based on FIFA Rank: 53.7%
-2. Number of Upsets based on Elo Score: 20.3%
+1. Number of Upsets based on FIFA Rank: 53.7%<br>
+2. Number of Upsets based on Elo Score: 20.3%<br>
 
 ```python
 train_results_df['fifa_upsets'] = ((train_results_df.home_score_x > train_results_df.away_score_x) & \
@@ -561,9 +564,9 @@ print('Classification Accuracy on testing set: {}%\n'.format(round(baselineModel
 
 ```
 
-Decision Tree Classifier:
-Classification Accuracy on training set: 74.12%
-Classification Accuracy on testing set: 72.69%
+Decision Tree Classifier:<br>
+Classification Accuracy on training set: 74.12%<br>
+Classification Accuracy on testing set: 72.69%<br>
 
 # Part 3: Ensemble Models
 
@@ -768,10 +771,10 @@ print('QDA Test Accuracy: {}%'.format(round(qda.score(test_features, test_labels
 print('KNN Test Accuracy: {}%'.format(round(knn.score(test_features, test_labels)*100,2)))
 print('XGB Test Accuracy: {}%'.format(round(xgb.score(test_features, test_labels)*100,2)))
 ```
-LDA Test Accuracy: 74.14%
-QDA Test Accuracy: 55.39%
-KNN Test Accuracy: 72.13%
-XGB Test Accuracy: 74.28%
+LDA Test Accuracy: 74.14%<br>
+QDA Test Accuracy: 55.39%<br>
+KNN Test Accuracy: 72.13%<br>
+XGB Test Accuracy: 74.28%<br>
 
 ### Comments
 1. Assemble model predictions to train and test model dataframes
@@ -807,8 +810,8 @@ print('Augmented Decision Meta-Tree Classifier:')
 print('Classification Accuracy on test set: {}%\n'.format(round(augmentedModel_dt.score(augmented_test, test_labels)*100, 2)))
 ```
 
-Augmented Decision Meta-Tree Classifier:
-Classification Accuracy on test set: 72.45%
+Augmented Decision Meta-Tree Classifier:<br>
+Classification Accuracy on test set: 72.45%<br>
 
 ### Comments
 1. Rebuild model this time without QDA
@@ -1065,25 +1068,25 @@ for match in round_of_16_games:
         winners.append(winning_team)
 ```
 Egypt vs. Portugal<br>
-Egypt wins in OT/PK<br><br>
+Egypt wins in OT/PK<br>
 
 France vs. Argentina<br>
-Argentina wins in OT/PK<br><br>
+Argentina wins in OT/PK<br>
 
 Costa Rica vs. Sweden<br>
-Sweden wins in regulation time<br><br>
+Sweden wins in regulation time<br>
 
 Belgium vs. Japan<br>
-Belgium wins in regulation time<br><br>
+Belgium wins in regulation time<br>
 
 Spain vs. Russia<br>
-Spain wins in OT/PK<br><br>
+Spain wins in OT/PK<br>
 
 Iceland vs. Peru<br>
-Iceland wins in OT/PK<br><br>
+Iceland wins in OT/PK<br>
 
 Germany vs. Switzerland<br>
-Germany wins in OT/PK<br><br>
+Germany wins in OT/PK<br>
 
 Colombia vs. Panama<br>
 Colombia wins in regulation time<br>
@@ -1124,16 +1127,16 @@ for match in round_of_8_games:
 ```
 
 Egypt vs. Argentina<br>
-Argentina wins in OT/PK<br><br>
+Argentina wins in OT/PK<br>
 
 Sweden vs. Belgium<br>
-Sweden wins in OT/PK<br><br>
+Sweden wins in OT/PK<br>
 
 Spain vs. Iceland<br>
-Spain wins in regulation time<br><br>
+Spain wins in regulation time<br>
 
 Germany vs. Colombia<br>
-Colombia wins in OT/PK<br><br>
+Colombia wins in OT/PK<br>
 
 ### Comments
 1. Compute SemiFinal
