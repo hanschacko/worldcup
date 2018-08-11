@@ -632,6 +632,7 @@ array([0.56661497, 0.99997483, 0.99997933, 0.99998319, 0.99998541])
 
 ### Comments
 1. Plot boundaries based on PCA transformation
+2. Based on the PCA plot, it looks like even the best classifier would struggle to achieve high accuracy given the large overlap between the win, loss, and tie class labels.
 
 ```python
 pca_transformer = PCA(2).fit(train_features)
@@ -892,7 +893,7 @@ print('Classification Accuracy on 2018 Group Stage: {}%'.format(round(lda.score(
 ```
 Classification Accuracy on 2018 Group Stage: 52.08%
 
-The LDA model performed about as well on the 2018 Group Stage matches as it did in the out-of-sample test set during Part 3.
+The LDA model achieved the highest out-of-sample test accuracy in Part 3 and it performed about as well on the 2018 Group Stage matches as it did on the test set during Part 3.
 
 
 ### Comments
