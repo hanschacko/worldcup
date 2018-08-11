@@ -869,6 +869,7 @@ wc2018_df.head()
 2. Update Elos
 3. Join region and income group data
 4. Add additional features to match the test set
+5. Capture Classification Accuracy of 2018 Group Stage
 
 ```python
 # prepare dataframes for Elo Rankings
@@ -936,34 +937,286 @@ wc2018_test_df = wc2018_elo_df[['neutral','home_elo_before_game','away_elo_befor
 wc2018_features = wc2018_test_df.drop(['result'], axis = 1)
 wc2018_labels = np.asarray(wc2018_elo_df['result'], dtype="|S6")
 
+import statsmodels.api as sm 
+
+X = wc2018_test_df.drop(['result'], axis = 1)
+X = sm.add_constant(X, has_constant='add')
+X = np.asarray(X, dtype='float')
+
+prediction_home_score = np.round(model_home.predict(X),0)
+prediction_away_score = np.round(model_away.predict(X),0)
+
+wc2018_features['pred_home_score'] = prediction_home_score
+wc2018_features['pred_away_score'] = prediction_away_score
+
+print('Classification Accuracy on 2018 Group Stage: {}%'.format(round(lda.score(wc2018_features, \
+                                                                                          wc2018_labels)*100, 2)))
+                                                                                          
+```
+Classification Accuracy on 2018 Group Stage: 52.08%
+
+The LDA model performed about as well on the 2018 Group Stage matches as it did in the out-of-sample test set during Part 3.
+
+
+### Comments
+1. Compute scores for the Group Stage to determine the group winners going to Knockout rounds
+
+```python
+wc2018_elo_df['model_pred'] = np.asarray(baselineModel.predict(wc2018_features), dtype='float')
+wc2018_elo_df['pred_home_score'] = prediction_home_score
+wc2018_elo_df['pred_away_score'] = prediction_away_score
+np.asarray(baselineModel.predict(wc2018_features), dtype='float')
+
+home_team_points = []
+away_team_points = []
+    
+for index, row in wc2018_elo_df.iterrows():
+    win = 3
+    loss = 0
+    draw = 1
+    if row['model_pred'] == 0.5:
+        home_team_points.append(draw)
+        away_team_points.append(draw)
+    elif row['model_pred'] == 1.0:
+        home_team_points.append(win)
+        away_team_points.append(loss)
+    elif row['model_pred'] == 0.0:
+        home_team_points.append(loss)
+        away_team_points.append(win)
+        
+wc2018_elo_df['home_points'] = pd.Series(home_team_points)
+wc2018_elo_df['away_points'] = pd.Series(away_team_points)
+
+cols = {'home_team': 'Team', 'pred_home_score': 'Goals', 'home_points': 'Points',
+        'away_team': 'Team', 'pred_away_score': 'Goals', 'away_points': 'Points'}
+
+home_team_group_results_df = wc2018_elo_df[['home_team', 'pred_home_score', 'home_points']].rename(columns=cols)
+away_team_group_results_df = wc2018_elo_df[['away_team', 'pred_away_score', 'away_points']].rename(columns=cols)
+
+scoreboard_df = pd.concat([home_team_group_results_df, away_team_group_results_df]).reset_index(drop=True)
+scoreboard_df = scoreboard_df.merge(pd.read_csv('worldcup_country_groups.csv'), on='Team', how='left')
+scoreboard_df = scoreboard_df.groupby(['Group', 'Team']).sum().reset_index()
+scoreboard_df = scoreboard_df.sort_values(['Group', 'Points', 'Goals'], ascending=[True, False, False]).reset_index(drop=True)
+scoreboard_df
+
 ```
 
+![World Cup Results](/Images/wc2.PNG)
 
-## Computing the Probabilities of Wins for the 32 Qualifying Teams
-![Alt Text](url)
-## Performance Comparison to a non-ML Approach
-![Alt Text](url)
-### Cleaning the Data
-![Alt Text](url)
-### Aggregating Team Stats
-![Alt Text](url)
-### Building a dataset for training a model
-![Alt Text](url)
-### Finalizing Training Dataset Format
-![Alt Text](url)
-### Introducing Poisson Distribution 
-![Alt Text](url)
+
+### Comments
+1. Compute Round of 16
+2. Predict Round of 16
+
+```python
+round_of_16_games = [(0, 5), (8, 13),
+                     (16, 21), (24, 29),
+                     (4, 1), (12, 9),
+                     (20, 17), (28, 25)]
+
+round_of_8_games = [(0, 1), (2, 3),
+                     (4, 5), (6, 7)]
+
+semifinal_games = [(0, 1), (2, 3)]
+
+final_game = [(0, 1)]
+players_df = pd.read_csv('CompleteFIFA2018PlayerDataset.csv', low_memory=False)
+
+def get_team_penalties(team):
+    mask = players_df['Nationality'] == team
+    return pd.to_numeric(players_df[mask]['Penalties'].head(5), errors='coerce').mean()
+
+def simulate_penalties(home_team, away_team):
+    home_pen = get_team_penalties(home_team)
+    away_pen = get_team_penalties(away_team)
+    
+    if home_pen == away_pen:
+        winner = home_team
+    elif home_pen > away_pen:
+        winner = home_team
+    elif home_pen < away_pen:
+        winner = away_team
+    
+    return winner
+winners = []
+
+for match in round_of_16_games:
+    
+    home_team = scoreboard_df.iloc[match[0]]['Team']
+    away_team = scoreboard_df.iloc[match[1]]['Team']
+    
+    # Get pre-match ratings
+    teamA_elo = elo_teams_df.loc[elo_teams_df['team'] == home_team, 'elo'].values[0]
+    teamB_elo = elo_teams_df.loc[elo_teams_df['team'] == away_team, 'elo'].values[0]
+
+    expected_win = expected_result(teamA_elo, teamB_elo)
+    
+    print('{} vs. {}'.format(home_team, away_team))
+    
+    if expected_win > 0.7:
+        print('{} wins in regulation time\n'.format(home_team))
+        winners.append(home_team)
+    elif expected_win < 0.3:
+        print('{} wins in regulation time\n'.format(away_team))
+        winners.append(away_team)
+    else:
+        winning_team = simulate_penalties(home_team, away_team)
+        print('{} wins in OT/PK\n'.format(winning_team))
+        winners.append(winning_team)
+```
+Egypt vs. Portugal<br>
+Egypt wins in OT/PK<br><br>
+
+France vs. Argentina<br>
+Argentina wins in OT/PK<br><br>
+
+Costa Rica vs. Sweden<br>
+Sweden wins in regulation time<br><br>
+
+Belgium vs. Japan<br>
+Belgium wins in regulation time<br><br>
+
+Spain vs. Russia<br>
+Spain wins in OT/PK<br><br>
+
+Iceland vs. Peru<br>
+Iceland wins in OT/PK<br><br>
+
+Germany vs. Switzerland<br>
+Germany wins in OT/PK<br><br>
+
+Colombia vs. Panama<br>
+Colombia wins in regulation time<br>
+
+### Comments
+1. Compute Round of 8
+2. Predict Round of 8
+
+```python
+round_of_8_games = np.array(winners).reshape(4,2)
+
+winners = []
+
+for match in round_of_8_games:
+    
+    home_team = match[0]
+    away_team = match[1]
+    
+    # Get pre-match ratings
+    teamA_elo = elo_teams_df.loc[elo_teams_df['team'] == home_team, 'elo'].values[0]
+    teamB_elo = elo_teams_df.loc[elo_teams_df['team'] == away_team, 'elo'].values[0]
+
+    expected_win = expected_result(teamA_elo, teamB_elo)
+    
+    print('{} vs. {}'.format(home_team, away_team))
+    
+    if expected_win > 0.7:
+        print('{} wins in regulation time\n'.format(home_team))
+        winners.append(home_team)
+    elif expected_win < 0.3:
+        print('{} wins in regulation time\n'.format(away_team))
+        winners.append(away_team)
+    else:
+        winning_team = simulate_penalties(home_team, away_team)
+        print('{} wins in OT/PK\n'.format(winning_team))
+        winners.append(winning_team)
+
+```
+
+Egypt vs. Argentina<br>
+Argentina wins in OT/PK<br><br>
+
+Sweden vs. Belgium<br>
+Sweden wins in OT/PK<br><br>
+
+Spain vs. Iceland<br>
+Spain wins in regulation time<br><br>
+
+Germany vs. Colombia<br>
+Colombia wins in OT/PK<br><br>
+
+### Comments
+1. Compute SemiFinal
+2. Predict SemiFinal Outcome
+
+```python
+semifinal_games = np.array(winners).reshape(2,2)
+
+winners = []
+
+for match in semifinal_games:
+    
+    home_team = match[0]
+    away_team = match[1]
+    
+    # Get pre-match ratings
+    teamA_elo = elo_teams_df.loc[elo_teams_df['team'] == home_team, 'elo'].values[0]
+    teamB_elo = elo_teams_df.loc[elo_teams_df['team'] == away_team, 'elo'].values[0]
+
+    expected_win = expected_result(teamA_elo, teamB_elo)
+    
+    print('{} vs. {}'.format(home_team, away_team))
+    
+    if expected_win > 0.7:
+        print('{} wins in regulation time\n'.format(home_team))
+        winners.append(home_team)
+    elif expected_win < 0.3:
+        print('{} wins in regulation time\n'.format(away_team))
+        winners.append(away_team)
+    else:
+        winning_team = simulate_penalties(home_team, away_team)
+        print('{} wins in OT/PK\n'.format(winning_team))
+        winners.append(winning_team)
+
+```
+Argentina vs. Sweden
+Argentina wins in OT/PK
+
+Spain vs. Colombia
+Colombia wins in OT/PK
+
+
+
+### Comments
+1. Compute Finals
+2. Predict Finals Outcome
+
+```python
+home_team = winners[0]
+away_team = winners[1]
+   
+# Get pre-match ratings
+teamA_elo = elo_teams_df.loc[elo_teams_df['team'] == home_team, 'elo'].values[0]
+teamB_elo = elo_teams_df.loc[elo_teams_df['team'] == away_team, 'elo'].values[0]
+
+expected_win = expected_result(teamA_elo, teamB_elo)
+    
+print('2018 World Cup Final\n'.format(home_team, away_team))
+print('{} vs. {}'.format(home_team, away_team))
+    
+if expected_win > 0.7:
+    print('{} wins in regulation time\n'.format(home_team))
+    winners.append(home_team)
+elif expected_win < 0.3:
+    print('{} wins in regulation time\n'.format(away_team))
+    winners.append(away_team)
+else:
+    winning_team = simulate_penalties(home_team, away_team)
+    print('{} wins in OT/PK\n'.format(winning_team))
+    winners.append(winning_team)
+```
+
+2018 World Cup Final<br>
+
+Argentina vs. Colombia<br>
+Argentina wins in OT/PK<br>
+
 
 # Literature Review
 
-1. Zeileis A, Leitner C, Hornik K (2018). "Probabilistic Forecasts for the 2018 FIFA World
-Cup Based on the Bookmaker Consensus Model", Working Paper 2018-09, Working
-Papers in Economics and Statistics, Research Platform Empirical and Experimental
-Economics, UniversitÃd’t Innsbruck.
-https://www2.uibk.ac.at/downloads/c4041030/wpaper/2018-09.pdf
-2. Goldman-Sachs Global Investment Research (2014). “The World Cup and Economics
-2014.” Accessed 2018-07-11, http://www.goldmansachs.com/our-thinking/outlook/
-world-cup-and-economics-2014-folder/world-cup-economics-report.pdf
-3. Elo, A. E. (1978). The rating of chessplayers, past and present. Arco Pub., New York.
-4. Lorenz A Gilch and Sebastian MÃijller. On Elo based prediction models for the FIFA
-Worldcup 2018. https://arxiv.org/abs/1806.01930
+1.	Zeileis A, Leitner C, Hornik K (2018). "Probabilistic Forecasts for the 2018 FIFA World Cup Based on the Bookmaker Consensus Model", Working Paper 2018-09, Working Papers in Economics and Statistics, Research Platform Empirical and Experimental Economics, UniversitÃd’t Innsbruck. https://www2.uibk.ac.at/downloads/c4041030/wpaper/2018-09.pdf
+2.	Goldman-Sachs Global Investment Research (2014). “The World Cup and Economics 2014.” Accessed 2018-07-11, http://www.goldmansachs.com/our-thinking/outlook/ world-cup-and-economics-2014-folder/world-cup-economics-report.pdf
+3.	Elo, A. E. (1978). The rating of chessplayers, past and present. Arco Pub., New York.
+4.	Lorenz A Gilch and Sebastian MÃijller. On Elo based prediction models for the FIFA Worldcup 2018. https://arxiv.org/abs/1806.01930
+5.	Strenk, Mike, Modeling the World Cup 2018, (2018), GitHub Repository, https://github.com/MikeStrenk/Modeling-the-World-Cup-2018
+
