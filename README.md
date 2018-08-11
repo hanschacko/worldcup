@@ -1,7 +1,7 @@
 ## CS-109A Data Science Final project
-Harvard University <br>
+**Harvard University** <br>
 Summer 2018 <br>
-Team: Bruno Janota and Hans Chacko #12 <br>
+Team #12: Bruno Janota and Hans Chacko  <br>
 
 
 [Project Statement and Background](#project-statement-and-background)<br>
