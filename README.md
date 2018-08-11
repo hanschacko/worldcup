@@ -4,8 +4,8 @@ Summer 2018 <br>
 Team: Bruno Janota and Hans Chacko #12 <br>
 
 
-[Project Statement and Background](# Project Statement and Background)<br>
-[Project Overview](# Project Overview)<br>
+[Project Statement and Background](#project-statement-and-background)<br>
+[Project Overview](#project-overview)<br>
 
 
 # Project Statement and Background
