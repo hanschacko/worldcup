@@ -341,10 +341,48 @@ The Elo rating system is a method for calculating the relative skill levels of t
 ![Elo2](/Images/elo2.PNG)
 ![Elo3](/Images/elo3.PNG)
 
-The elo ratings for the top 5 rated teams going into the 2018 World Cup are as follows:
-![Elo4](/Images/elo4.PNG)
-![Elo5](/Images/elo5.PNG)
+## Comment
+1. Set some constants
+2. Define function to Update ELO
+3. Define function to get Expected result
 
+```python
+mean_elo = 1500
+elo_width = 400
+
+def update_elo(home_elo, away_elo, match_result, match_type, home_score, away_score):
+    """
+    https://en.wikipedia.org/wiki/Elo_rating_system#Mathematical_details
+    """
+    if(match_type == 'FIFA World Cup'):
+        k_factor = 60.0
+    elif(match_type == 'Friendly'):
+        k_factor = 20.0
+    else:
+        k_factor = 40.0    
+    
+    if(home_score == away_score):
+        goal_factor = 1.0
+    elif(np.abs(home_score - away_score) == 2):
+        goal_factor = 1.5
+    else:
+        goal_factor = (11 + np.abs(home_score - away_score))/8        
+    
+    expected_win = expected_result(home_elo, away_elo)
+    change_in_elo = k_factor * goal_factor * (match_result - expected_win)
+    home_elo += change_in_elo
+    away_elo -= change_in_elo
+    
+    return home_elo, away_elo
+
+def expected_result(elo_a, elo_b):
+    """
+    https://en.wikipedia.org/wiki/Elo_rating_system#Mathematical_details
+    """
+    expect_a = 1.0/(1+10**((elo_b - elo_a)/elo_width))
+    return expect_a
+
+```
 
 ## Compute Elo Rating
 The loop where it happens
@@ -353,6 +391,162 @@ The loop where it happens
 - We calculate the expected wins for the team that actually won.
 - Write Elo before and after the game in the Data Frame.
 - Update the Elo rating for both teams in the "current_elos" list.
+
+```python
+current_season = elo_games_df.date[:0].dt.year
+for row in elo_games_df.itertuples():
+       
+    idx = row.Index
+    home_team = row.home_team
+    away_team = row.away_team
+  
+    # Get pre-match ratings
+    teamA_elo = elo_teams_df.loc[elo_teams_df['team'] == home_team, 'elo'].values[0]
+    teamB_elo = elo_teams_df.loc[elo_teams_df['team'] == away_team, 'elo'].values[0]
+
+    # Update on game results
+    home_elo_after, away_elo_after = update_elo(teamA_elo, teamB_elo, row.result, row.tournament, 
+                                                row.home_score, row.away_score)
+        
+    # Save updated elos
+    elo_games_df.at[idx, 'home_elo_before_game'] = teamA_elo
+    elo_games_df.at[idx, 'away_elo_before_game'] = teamB_elo
+    elo_games_df.at[idx, 'home_elo_after_game'] = home_elo_after
+    elo_games_df.at[idx, 'away_elo_after_game'] = away_elo_after
+    
+    # update current elos
+    elo_teams_df.set_value(elo_teams_df.loc[elo_teams_df.team == home_team].index.values[0], 'elo', home_elo_after)
+    elo_teams_df.set_value(elo_teams_df.loc[elo_teams_df.team == away_team].index.values[0], 'elo', away_elo_after)
+
+elo_games_df.head()
+
+elo_teams_df.sort_values(['elo'], ascending=False).head(10)
+
+```
+### Comments
+1. Capture top 5 teams and plot elo change with time for each team
+
+```python
+elo_top5 = elo_teams_df.sort_values(['elo'], ascending=False).head(5)['team'].values.tolist()
+
+fig, axs = plt.subplots(5,1, figsize=(12, 26), facecolor='w', edgecolor='k')
+axs = axs.ravel()
+
+for i, team in enumerate(elo_top5):
+    team_df = elo_games_df[(elo_games_df['home_team'] == team) | (elo_games_df['away_team'] == team)] 
+    
+    elo_over_time = []
+    for row in team_df.itertuples():
+        if(row.home_team == team):
+            elo_over_time.append(row.home_elo_before_game)
+        else:
+            elo_over_time.append(row.away_elo_before_game)
+
+    axs[i].plot(elo_over_time)
+    axs[i].set_ylabel('Elo Points', fontsize=12)
+    axs[i].set_title('{} Elo (1993-2018)'.format(team))
+    axs[i].set_xlabel('Match Number', fontsize=12) 
+
+plt.show()
+```
+
+The elo ratings for the top 5 rated teams going into the 2018 World Cup are as follows:
+![Elo4](/Images/elo4.PNG)
+![Elo5](/Images/elo5.PNG)
+
+## Comments
+1. Join Elo Scores with World Cup games dataset
+2. Plot Fifa Rank Difference vs Match Outcome
+
+```python
+results_df['index'] = range(len(results_df))
+train_results_df = results_df.merge(elo_games_df, 
+                        left_on='index', 
+                        right_on='index')
+                        
+plt.rcParams['figure.figsize'] = (15,10)
+train_results_df.plot.scatter('index','rank_difference', c='result_x', colormap='jet', alpha=0.5,
+                             title = 'FIFA Rank Difference vs. Match Outcome')
+plt.show()
+                        
+```
+![Elo6](/Images/elo6.PNG)
+
+## Comment
+1. Number of Upsets based on FIFA Rank: 53.7%
+2. Number of Upsets based on Elo Score: 20.3%
+```python
+train_results_df['fifa_upsets'] = ((train_results_df.home_score_x > train_results_df.away_score_x) & \
+                              (train_results_df.rank_home < train_results_df.rank_away)) | \
+                              ((train_results_df.away_score_x > train_results_df.home_score_x) & \
+                               (train_results_df.rank_away < train_results_df.rank_home))
+    
+train_results_df['elo_upsets'] = ((train_results_df.home_score_x > train_results_df.away_score_x) & \
+                              (train_results_df.home_elo_before_game < train_results_df.away_elo_before_game)) | \
+                              ((train_results_df.away_score_x > train_results_df.home_score_x) & \
+                               (train_results_df.away_elo_before_game < train_results_df.home_elo_before_game))
+        
+print('Number of Upsets based on FIFA Rank: {}%'
+      .format(round(train_results_df.fifa_upsets.sum()/train_results_df.fifa_upsets.count()*100, 1)))
+
+print('Number of Upsets based on Elo Score: {}%'
+      .format(round(train_results_df.elo_upsets.sum()/train_results_df.elo_upsets.count()*100, 1)))
+
+```
+
+
+Number of Upsets based on FIFA Rank: 53.7%
+Number of Upsets based on Elo Score: 20.3%
+
+## Comment
+1. Generate Additional Features
+2. Remove features without predictive value or not known prior to game start
+3. Split training set in features/labels
+4. Using Skicit-learn to split data into training and testing sets
+5. Split the data into training and testing sets
+6. Build model and capture training and test accuracies
+
+```python
+# generate additional features
+train_results_df['elo_difference'] = train_results_df['home_elo_before_game'] - train_results_df['away_elo_before_game']
+train_results_df['average_elo'] = (train_results_df['home_elo_before_game'] + train_results_df['away_elo_before_game'])/2
+
+no_draw_train_df = train_results_df[train_results_df['result_x'] != 0.5]
+
+# remove features without predictive value or not known prior to game start
+train_elo_df = no_draw_train_df[['neutral','home_elo_before_game','away_elo_before_game','is_stake','elo_difference',
+                                 'average_elo','Region_Europe & Central Asia_home','Region_Latin America & Caribbean_home',
+                                 'Region_Middle East & North Africa_home','Region_North America_home','Region_South Asia_home',
+                                 'Region_Sub-Saharan Africa_home','IncomeGroup_High income: nonOECD_home',
+                                 'IncomeGroup_Low income_home','IncomeGroup_Lower middle income_home',
+                                 'IncomeGroup_Upper middle income_home','Region_Europe & Central Asia_away',
+                                 'Region_Latin America & Caribbean_away','Region_Middle East & North Africa_away',
+                                 'Region_North America_away','Region_South Asia_away','Region_Sub-Saharan Africa_away',
+                                 'IncomeGroup_High income: nonOECD_away','IncomeGroup_Low income_away',
+                                 'IncomeGroup_Lower middle income_away','IncomeGroup_Upper middle income_away','result_x']]
+
+# split training set in features/labels
+features = train_elo_df.drop(['result_x'], axis = 1)
+labels = np.asarray(train_elo_df['result_x'], dtype="|S6")
+
+# Using Skicit-learn to split data into training and testing sets
+from sklearn.model_selection import train_test_split
+
+# Split the data into training and testing sets
+train_features, test_features, train_labels, test_labels = train_test_split(features, labels, test_size = 0.25, 
+                                                                            random_state = 42)
+                                                                            
+                                                                            baselineModel = DecisionTreeClassifier(max_depth=5).fit(train_features, train_labels)
+
+print('Decision Tree Classifier:')
+print('Classification Accuracy on training set: {}%'.format(round(baselineModel.score(train_features, train_labels,)*100, 2)))
+print('Classification Accuracy on testing set: {}%\n'.format(round(baselineModel.score(test_features, test_labels,)*100, 2)))
+
+```
+
+Decision Tree Classifier:
+Classification Accuracy on training set: 74.12%
+Classification Accuracy on testing set: 72.69%
 
 # Part 3 : Predicting the 2018 World Cup 
 
