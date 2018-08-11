@@ -4,7 +4,7 @@ Summer 2018 <br>
 Team #12: Bruno Janota and Hans Chacko  <br>
 
 
-[Project Statement and Background](#project-statement-and-background)<br>
+[Background](#background)<br>
 [Project Overview](#project-overview)<br>
 [Part 1: Baseline Model](#part-1-baseline-model)<br>
 [Part 2: Developing Model with Elo Ranking](#elo-ranking-system)<br>
@@ -12,7 +12,7 @@ Team #12: Bruno Janota and Hans Chacko  <br>
 [Part 4: Predicting the 2018 World Cup](#part-4-predicting-the-2018-world-cup)<br>
 
 
-# Project Statement and Background
+# Background
 
 The goal of this project will be to leverage various sources of team and player data in addition to historical match results to construct a 2018 FIFA World Cup prediction model and evaluate those models against the baseline of predictions from simply incorporating FIFA ranking as a measure of team strength. <br>
 
