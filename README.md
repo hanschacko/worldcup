@@ -561,6 +561,276 @@ Classification Accuracy on testing set: 72.69%
 ## Ensemble Learners
 The optimal combination of features from parts 1 and 2 (may include FIFA rank, Elo score, or both) will be used to train a variety of classification models (Random Forest, xgboost, LDA, QDA, KNN, etc.). The probabilistic results for each match (win, tie, loss) will be blended with the results of a Poisson Distribution model that uses the complete player ranking data scraped from sofifa.com for the FIFA 2018 video game to predict the group stages of the 2018 FIFA World Cup. The knockout stages of the world cup will be simulated 1000 times to determine the probability of each team winning the tournament. Matches that result in a tie during the knockout stages will take into account the average penalty rating of the top 5 penalty shooters for each time from the sofifa.com data set to break the tie. The final result will be the probability of each of the 32 teams that qualified for the 2018 World Cup to win the tournament.
 
+## RandomForestClassifier
+
+### Comments
+```python
+# Import the model we are using
+from sklearn.ensemble import RandomForestClassifier
+# Instantiate model with 500 decision trees
+rf = RandomForestClassifier(n_estimators = 500, random_state = 42)
+# Train the model on training data
+rf.fit(train_features, train_labels);
+# Use the forest predict method on the test data
+predictions = rf.predict(test_features)
+# View the predicted probabilities of the first 10 observations
+rf.predict_proba(test_features)[0:10]
+# Create confusion matrix
+pd.crosstab(test_labels, predictions, rownames=['Actual Outcome'], colnames=['Predicted Outcome']).apply(lambda r: r/r.sum(), axis=1)
+from sklearn.metrics import accuracy_score
+```
+![Random Forest Accuracy Score](/Images/model1.PNG)
+
+### Comments
+1. Test Accuracy
+
+```python
+# Test Accuracy
+print('Test Accuracy: {}'.format(accuracy_score(test_labels, predictions)))
+```
+Test Accuracy: 0.7258632840028189
+
+### Important Features
+
+```python
+# get feature names
+feature_list = list(features.columns)
+
+# Get numerical feature importances
+importances = list(rf.feature_importances_)
+
+# List of tuples with variable and importance
+feature_importances = [(feature, round(importance, 2)) for feature, importance in zip(feature_list, importances)]
+
+# Sort the feature importances by most important first
+feature_importances = sorted(feature_importances, key = lambda x: x[1], reverse = True)
+
+# Print out the feature and importances 
+[print('Variable: {:30} Importance: {}'.format(*pair)) for pair in feature_importances];
+```
+Variable: elo_difference                 Importance: 0.26<br>
+Variable: away_elo_before_game           Importance: 0.19<br>
+Variable: home_elo_before_game           Importance: 0.18<br>
+Variable: average_elo                    Importance: 0.16<br>
+Variable: neutral                        Importance: 0.02<br>
+Variable: is_stake                       Importance: 0.02<br>
+Variable: IncomeGroup_Upper middle income_home Importance: 0.02<br>
+Variable: IncomeGroup_Upper middle income_away Importance: 0.02<br>
+Variable: Region_Europe & Central Asia_home Importance: 0.01<br>
+Variable: Region_Latin America & Caribbean_home Importance: 0.01<br>
+Variable: Region_Middle East & North Africa_home Importance: 0.01<br>
+Variable: Region_Sub-Saharan Africa_home Importance: 0.01<br>
+Variable: IncomeGroup_High income: nonOECD_home Importance: 0.01<br>
+Variable: IncomeGroup_Low income_home    Importance: 0.01<br>
+Variable: IncomeGroup_Lower middle income_home Importance: 0.01<br>
+Variable: Region_Europe & Central Asia_away Importance: 0.01<br>
+Variable: Region_Latin America & Caribbean_away Importance: 0.01<br>
+Variable: Region_Middle East & North Africa_away Importance: 0.01<br>
+Variable: Region_Sub-Saharan Africa_away Importance: 0.01<br>
+Variable: IncomeGroup_High income: nonOECD_away Importance: 0.01<br>
+Variable: IncomeGroup_Low income_away    Importance: 0.01<br>
+Variable: IncomeGroup_Lower middle income_away Importance: 0.01<br>
+Variable: Region_North America_home      Importance: 0.0<br>
+Variable: Region_South Asia_home         Importance: 0.0<br>
+Variable: Region_North America_away      Importance: 0.0<br>
+Variable: Region_South Asia_away         Importance: 0.0<br>
+
+### PCA
+
+```python
+from sklearn.decomposition import PCA
+
+pca_5_transformer = PCA(5).fit(train_features)
+np.cumsum(pca_5_transformer.explained_variance_ratio_)
+```
+array([0.56661497, 0.99997483, 0.99997933, 0.99998319, 0.99998541])
+
+### Comments
+1. Plot boundaries based on PCA transformation
+
+```python
+pca_transformer = PCA(2).fit(train_features)
+x_train_2d = pca_transformer.transform(train_features)
+x_test_2d = pca_transformer.transform(test_features)
+
+# lists to track each group's plotting color and label
+colors = ['r', 'g', 'b']
+label_text = ['Loss', 'Draw', 'Win']
+
+plt.rcParams['figure.figsize'] = (10,8)
+
+# loop over the different groups
+for result in [0.0,0.5,1]:
+    result_df = x_train_2d[train_labels.astype(np.float) == result]
+    plt.scatter(result_df[:,0], result_df[:,1], c = colors[int(2*result)], label=label_text[int(2*result)])
+    
+# add labels
+plt.xlabel("PCA Dimension 1")
+plt.ylabel("PCA Dimention 2")
+plt.legend()
+plt.show()
+```
+![PCA](/Images/model2.PNG)
+
+### KNN
+
+### Comments
+1. Find optimum number of neighbours
+
+```python
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.model_selection import cross_val_score
+
+neighbors = list(range(1,41))
+cv_scores = []
+for k in neighbors:
+    knn = KNeighborsClassifier(n_neighbors=k)
+    scores = cross_val_score(knn, train_features, train_labels, cv=10, scoring='accuracy')
+    cv_scores.append(scores.mean())
+    
+# determining best k
+optimal_k = neighbors[cv_scores.index(max(cv_scores))]
+print('The optimal number of neighbors is: {}'.format(optimal_k))
+
+# plot classification accuracy vs k
+plt.plot(neighbors, cv_scores)
+plt.xlabel('Number of Neighbors K')
+plt.ylabel('Classification Accuracy')
+plt.show()
+```
+The optimal number of neighbors is: 38
+
+![KNN Neighbours](/Images/model3.PNG)
+
+### XGBoost
+
+### Comments
+1. Find Optimum Depth
+2. Plot depths
+
+```python
+from xgboost import XGBClassifier
+
+depth = list(range(1,11))
+cv_scores = []
+for d in depth:
+    xgb = XGBClassifier(max_depth=d)
+    scores = cross_val_score(xgb, train_features, train_labels, cv=10, scoring='accuracy')
+    cv_scores.append(scores.mean())
+    
+# determining best depth
+optimal_depth = depth[cv_scores.index(max(cv_scores))]
+print('The optimal max depth for XGB model is: {}'.format(optimal_depth))
+
+# plot classification accuracy vs depth
+plt.plot(depth, cv_scores)
+plt.xlabel('Max Tree Depth')
+plt.ylabel('Classification Accuracy')
+plt.show()
+```
+The optimal max depth for XGB model is: 3
+
+![XGBoost](/Images/model4.PNG)
+
+### Build Ensemble
+
+### Comments
+1. Build Models : LDA, QDA, KNN, XGB
+2. Get accuracy of each
+
+```python
+from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
+from sklearn.discriminant_analysis import QuadraticDiscriminantAnalysis
+from sklearn.neighbors import KNeighborsClassifier
+
+lda = LinearDiscriminantAnalysis().fit(train_features, train_labels)
+qda = QuadraticDiscriminantAnalysis().fit(train_features, train_labels)
+knn = KNeighborsClassifier(n_neighbors=23).fit(train_features, train_labels)
+xgb = XGBClassifier(max_depth=2).fit(train_features, train_labels)
+
+print('LDA Test Accuracy: {}%'.format(round(lda.score(test_features, test_labels)*100,2)))
+print('QDA Test Accuracy: {}%'.format(round(qda.score(test_features, test_labels)*100,2)))
+print('KNN Test Accuracy: {}%'.format(round(knn.score(test_features, test_labels)*100,2)))
+print('XGB Test Accuracy: {}%'.format(round(xgb.score(test_features, test_labels)*100,2)))
+```
+LDA Test Accuracy: 74.14%
+QDA Test Accuracy: 55.39%
+KNN Test Accuracy: 72.13%
+XGB Test Accuracy: 74.28%
+
+### Comments
+1. Assemble model predictions to train and test model dataframes
+2. Augment training and test dataframes to corresponding prediction model dataframe
+
+```python
+model_names = ['lda', 'qda', 'knn', 'xgb']
+models = [lda, qda, knn, xgb]
+
+ensemble_tune = []
+ensemble_test = []
+
+for i in models:
+    ensemble_tune.append(i.predict(x_train_2d))
+    ensemble_test.append(i.predict(x_test_2d))
+
+ensemble_tune = np.array(ensemble_tune).reshape(4, len(x_train_2d)).T
+ensemble_test = np.array(ensemble_test).reshape(4, len(x_test_2d)).T
+
+# Convert ensemble tune/test to dataframes to concatenate
+ensemble_tune_df = pd.DataFrame(np.vstack(ensemble_tune), columns = model_names)
+ensemble_test_df = pd.DataFrame(np.vstack(ensemble_test), columns = model_names)
+x_tune = pd.DataFrame(x_train_2d, columns = ['PCA1', 'PCA2'])
+x_test = pd.DataFrame(x_test_2d, columns = ['PCA1', 'PCA2'])
+
+# Concatenate x_tune/x_test with ensemble_tune/test
+augmented_tune = pd.concat([x_tune, ensemble_tune_df], axis=1, join_axes=[x_tune.index])
+augmented_test = pd.concat([x_test, ensemble_test_df], axis=1, join_axes=[x_test.index])
+
+augmentedModel_dt = DecisionTreeClassifier(max_depth=4).fit(augmented_tune, train_labels)
+
+print('Augmented Decision Meta-Tree Classifier:')
+print('Classification Accuracy on test set: {}%\n'.format(round(augmentedModel_dt.score(augmented_test, test_labels)*100, 2)))
+```
+Augmented Decision Meta-Tree Classifier:
+Classification Accuracy on test set: 72.45%
+
+### Comments
+1. Rebuild model this time without QDA
+2. Augment training and test dataframes to corresponding prediction model dataframe
+
+```python
+model_names = ['lda', 'knn', 'xgb']
+models = [lda, knn, xgb]
+
+ensemble_tune = []
+ensemble_test = []
+
+for i in models:
+    ensemble_tune.append(i.predict(train_features))
+    ensemble_test.append(i.predict(test_features))
+
+ensemble_tune = np.array(ensemble_tune).reshape(len(models), len(train_features)).T
+ensemble_test = np.array(ensemble_test).reshape(len(models), len(test_features)).T
+
+# Convert ensemble tune/test to dataframes to concatenate
+ensemble_tune_df = pd.DataFrame(np.vstack(ensemble_tune), columns = model_names)
+ensemble_test_df = pd.DataFrame(np.vstack(ensemble_test), columns = model_names)
+
+# Concatenate x_tune/x_test with ensemble_tune/test
+train_features = train_features.reset_index(drop = True)
+test_features = test_features.reset_index(drop = True)
+
+augmented_tune = pd.concat([train_features, ensemble_tune_df], axis=1, join_axes=[train_features.index])
+augmented_test = pd.concat([test_features, ensemble_test_df], axis=1, join_axes=[test_features.index])
+
+augmentedModel_dt = DecisionTreeClassifier(max_depth=4).fit(augmented_tune, train_labels)
+
+print('Augmented Decision Meta-Tree Classifier:')
+print('Classification Accuracy on test set: {}%\n'.format(round(augmentedModel_dt.score(augmented_test, test_labels)*100, 2)))
+```
+Augmented Decision Meta-Tree Classifier:
+Classification Accuracy on test set: 73.47%
+
 # Part 4: Predicting the 2018 World Cup 
 
 
