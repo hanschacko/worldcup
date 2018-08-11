@@ -6,7 +6,13 @@ Team: Bruno Janota and Hans Chacko #12 <br>
 
 [Project Statement and Background](#project-statement-and-background)<br>
 [Project Overview](#project-overview)<br>
+[Part1: Baseline Model](#part1:-baseline-model)<br>
+[Part 2: Developing Model with Elo Ranking](#part-2:-developing-model-with-elo-ranking)<br>
+[Part 3: Ensemble Models](#part-3:-ensemble-models)<br>
+[Part 4: Predicting the 2018 World Cup](#part-4:predicting-the-2018-world-cup)<br>
 
+
+Part 2: Developing Model with Elo Ranking
 
 # Project Statement and Background
 
@@ -55,7 +61,7 @@ The optimal combination of features from parts 1 and 2 (may include FIFA rank, E
 Part 4 : Predicting the 2018 World Cup<br>
 The knockout stages of the world cup will be simulated 1000 times to determine the probability of each team winning the tournament. Matches that result in a tie during the knockout stages will take into account the average penalty rating of the top 5 penalty shooters for each time from the sofifa.com data set to break the tie. The final result will be the probability of each of the 32 teams that qualified for the 2018 World Cup to win the tournament.<br><br>
 
-# Part 1 : Baseline Model
+# Part 1: Baseline Model
 ## Load, Clean and Merge Data
 
 ### Comments
@@ -338,7 +344,7 @@ Image(graph.create_png())
 ```
 ![Baseline Tree](/Images/BaselineTree.png)
 
-# Part 2 : Developing Model with Elo Ranking
+# Part 2: Developing Model with Elo Ranking
 ## Elo Ranking System
 The Elo rating system is a method for calculating the relative skill levels of teams (or players) in zero-sum games. From Wikipedia, a team's Elo rating as applied to our data set is represented by a number which increases or decreases depending on the outcome of matches between international teams. After every game, the winning team takes points from the losing one. The difference between the ratings of the winner and loser determines the total number of points gained or lost after a game. In a series of games between a high-rated team and a low-rated team, the high-rated team is expected to score more wins. If the high-rated team wins, then only a few rating points will be taken from the low-rated team. However, if the lower rated team scores an upset win, many rating points will be transferred. The lower rated team will also gain a few points from the higher rated team in the event of a draw. This means that this rating system is self-correcting. A team whose rating is too low should, in the long run, do better than the rating system predicts, and thus gain rating points until the rating reflects their true playing strength. The elo function that we used resembles the Elo World Ranking which is defined below:
 
@@ -553,10 +559,12 @@ Decision Tree Classifier:
 Classification Accuracy on training set: 74.12%
 Classification Accuracy on testing set: 72.69%
 
-# Part 3 : Predicting the 2018 World Cup 
-
+# Part 3: Ensemble Models
 ## Ensemble Learners
 The optimal combination of features from parts 1 and 2 (may include FIFA rank, Elo score, or both) will be used to train a variety of classification models (Random Forest, xgboost, LDA, QDA, KNN, etc.). The probabilistic results for each match (win, tie, loss) will be blended with the results of a Poisson Distribution model that uses the complete player ranking data scraped from sofifa.com for the FIFA 2018 video game to predict the group stages of the 2018 FIFA World Cup. The knockout stages of the world cup will be simulated 1000 times to determine the probability of each team winning the tournament. Matches that result in a tie during the knockout stages will take into account the average penalty rating of the top 5 penalty shooters for each time from the sofifa.com data set to break the tie. The final result will be the probability of each of the 32 teams that qualified for the 2018 World Cup to win the tournament.
+
+# Part 4: Predicting the 2018 World Cup 
+
 
 ## Computing the Probabilities of Wins for the 32 Qualifying Teams
 ![Alt Text](url)
