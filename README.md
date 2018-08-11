@@ -833,6 +833,95 @@ Classification Accuracy on test set: 73.47%
 
 # Part 4: Predicting the 2018 World Cup 
 
+## Load 2018 World Cup Schedule with Results
+
+### Comments
+1. Load World Cup Schedule with Results into a dataframe
+```python
+wc2018_df = pd.read_csv('2018WorldCupGroupSchedule-withResults.csv')
+wc2018_df['Date'] = pd.to_datetime(wc2018_df['Date'])
+wc2018_df.head()
+```
+![World Cup Results](/Images/wc1.PNG)
+
+## Feature Engineering
+
+### Comments
+1. Prepare Dataframes for Elo Rankings
+2. Update Elos
+3. Join region and income group data
+4. Add additional features to match the test set
+
+```python
+# prepare dataframes for Elo Rankings
+wc2018_elo_df = wc2018_df[['home_team','away_team','home_score','away_score','tournament','neutral', \
+                           'is_stake','result']].reset_index()
+wc2018_elo_df['home_elo_before_game'] = 0
+wc2018_elo_df['home_elo_after_game'] = 0
+wc2018_elo_df['away_elo_before_game'] = 0
+wc2018_elo_df['away_elo_after_game'] = 0
+wc2018_elo_df.head()
+
+for row in wc2018_elo_df.itertuples():
+       
+    idx = row.Index
+    home_team = row.home_team
+    away_team = row.away_team
+  
+    # Get pre-match ratings
+    teamA_elo = elo_teams_df.loc[elo_teams_df['team'] == home_team, 'elo'].values[0]
+    teamB_elo = elo_teams_df.loc[elo_teams_df['team'] == away_team, 'elo'].values[0]
+
+    # Update on game results
+    home_elo_after, away_elo_after = update_elo(teamA_elo, teamB_elo, row.result, row.tournament, 
+                                                row.home_score, row.away_score)
+        
+    # Save updated elos
+    wc2018_elo_df.at[idx, 'home_elo_before_game'] = teamA_elo
+    wc2018_elo_df.at[idx, 'away_elo_before_game'] = teamB_elo
+    wc2018_elo_df.at[idx, 'home_elo_after_game'] = home_elo_after
+    wc2018_elo_df.at[idx, 'away_elo_after_game'] = away_elo_after
+    
+    # update current elos
+    elo_teams_df.set_value(elo_teams_df.loc[elo_teams_df.team == home_team].index.values[0], 'elo', home_elo_after)
+    elo_teams_df.set_value(elo_teams_df.loc[elo_teams_df.team == away_team].index.values[0], 'elo', away_elo_after)
+
+wc2018_elo_df.head()
+
+# join region and income group data
+wc2018_elo_df = wc2018_elo_df.merge(country_df, 
+                        left_on=['home_team'], 
+                        right_on=['ShortName'])
+wc2018_elo_df = wc2018_elo_df.merge(country_df, 
+                        left_on=['away_team'], 
+                        right_on=['ShortName'], 
+                        suffixes=('_home', '_away'))
+wc2018_elo_df.sort_values(by = 'index', inplace=True)
+
+# Add additional features to match the test set
+wc2018_elo_df['elo_difference'] = wc2018_elo_df['home_elo_before_game'] - wc2018_elo_df['away_elo_before_game']
+wc2018_elo_df['average_elo'] = (wc2018_elo_df['home_elo_before_game'] + wc2018_elo_df['away_elo_before_game'])/2
+
+
+wc2018_test_df = wc2018_elo_df[['neutral','home_elo_before_game','away_elo_before_game','is_stake','elo_difference',
+                                 'average_elo','Region_Europe & Central Asia_home','Region_Latin America & Caribbean_home',
+                                 'Region_Middle East & North Africa_home','Region_North America_home','Region_South Asia_home',
+                                 'Region_Sub-Saharan Africa_home','IncomeGroup_High income: nonOECD_home',
+                                 'IncomeGroup_Low income_home','IncomeGroup_Lower middle income_home',
+                                 'IncomeGroup_Upper middle income_home','Region_Europe & Central Asia_away',
+                                 'Region_Latin America & Caribbean_away','Region_Middle East & North Africa_away',
+                                 'Region_North America_away','Region_South Asia_away','Region_Sub-Saharan Africa_away',
+                                 'IncomeGroup_High income: nonOECD_away','IncomeGroup_Low income_away',
+                                 'IncomeGroup_Lower middle income_away','IncomeGroup_Upper middle income_away','result']]
+
+# Select features in the same order as used for training
+wc2018_features = wc2018_test_df.drop(['result'], axis = 1)
+wc2018_labels = np.asarray(wc2018_elo_df['result'], dtype="|S6")
+
+
+
+```
+
 
 ## Computing the Probabilities of Wins for the 32 Qualifying Teams
 ![Alt Text](url)
