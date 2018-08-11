@@ -392,6 +392,8 @@ def expected_result(elo_a, elo_b):
 
 ```
 
+# Part 2: Developing Model with Elo Ranking
+
 ## Compute Elo Rating
 The loop where it happens
 - We go through each row in the DataFrame.
