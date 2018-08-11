@@ -301,7 +301,7 @@ plt.show()
 ```
 The optimal tree depth is: 5
 
-![Baseline Tree](/Images/TreeDepth.png)
+![Tree Depth](/Images/TreeDepth.png)
 
 ### Comments
 1. Use cross-validation to build baseline model
