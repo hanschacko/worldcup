@@ -14,38 +14,14 @@ Team #12: Bruno Janota and Hans Chacko  <br>
 
 # Background
 
-The goal of this project will be to leverage various sources of team and player data in addition to 
-historical match results to construct a 2018 FIFA World Cup prediction model and evaluate those models 
-against the baseline of predictions from simply incorporating FIFA ranking as a measure of team strength. <br>
+The goal of this project will be to leverage various sources of team and player data in addition to historical match results to construct a 2018 FIFA World Cup prediction model and evaluate those models against the baseline of predictions from simply incorporating FIFA ranking as a measure of team strength. <br>
 
-The FIFA World Cup is one of the most prominent sporting events in the world yet relative to
-other major sports, football/futbol/soccer analytics generally lags the state of the art for sports
-analytics. There are many reasons why national team soccer analytics trails other major sports
-like baseball basketball and American football. For example, many national team matches are
-against regional opponents as part of regional tournaments or world cup qualifiers and a
-disproportional amount of the available data is from segmented sources therefore, compiling
-something as simple as a relative ranking among all nations can be quite challenging.<br>
+The FIFA World Cup is one of the most prominent sporting events in the world yet relative to other major sports, football/futbol/soccer analytics generally lags the state of the art for sports analytics. There are many reasons why national team soccer analytics trails other major sports like baseball basketball and American football. For example, many national team matches are against regional opponents as part of regional tournaments or world cup qualifiers and a disproportional amount of the available data is from segmented sources therefore, compiling something as simple as a relative ranking among all nations can be quite challenging.<br>
 
-FIFA’s response to this problem was the introduction of an official FIFA ranking for each
-member nation beginning in December 1992. The initial rankings were met with criticism and
-significant changes were implemented in January 1999 and July 2006. The initial ranking
-comprised of a team receiving one point for a draw or three for a victory in FIFA-recognized
-matches like traditional league scoring, but the method proved to be overly simplistic for
-international comparisons. The 1999 ranking system update scaled the point ranking by a factor
-of 10 and considered the number of goals scored/conceded, whether the match was home or
-away, the importance of the match and regional strength which enabled match losers to earn
-points and a fixed number of points were no longer necessarily awarded for a victory or a draw.
-The rankings were again met with criticism and in 2006, updates were introduced to reduce the
-evaluation period to 4 years vs. 8 years, revise the match importance parameters, and ignore the
-goals scored and home or away advantage.<br>
+FIFA’s response to this problem was the introduction of an official FIFA ranking for each member nation beginning in December 1992. The initial rankings were met with criticism and significant changes were implemented in January 1999 and July 2006. The initial ranking
+comprised of a team receiving one point for a draw or three for a victory in FIFA-recognized matches like traditional league scoring, but the method proved to be overly simplistic for international comparisons. The 1999 ranking system update scaled the point ranking by a factor of 10 and considered the number of goals scored/conceded, whether the match was home or away, the importance of the match and regional strength which enabled match losers to earn points and a fixed number of points were no longer necessarily awarded for a victory or a draw. The rankings were again met with criticism and in 2006, updates were introduced to reduce the evaluation period to 4 years vs. 8 years, revise the match importance parameters, and ignore the goals scored and home or away advantage.<br>
 
-Additionally, it was recently announced that following the 2018 World Cup, the FIFA world
-rankings would adopt an Elo based ranking system which considers many factors including the
-teams previous rating, the status (in order of importance: World Cup/Olympic games, continental
-championship and intercontinental tournaments, world cup qualifiers, all other tournaments, and
-lastly friendlies), goal difference, result, and expected result of the match. Since this ranking has 
-not yet been introduced the basis of this analysis will compare the results to the pre-2018
-rankings.<br>
+Additionally, it was recently announced that following the 2018 World Cup, the FIFA world rankings would adopt an Elo based ranking system which considers many factors including the teams previous rating, the status (in order of importance: World Cup/Olympic games, continental championship and intercontinental tournaments, world cup qualifiers, all other tournaments, and lastly friendlies), goal difference, result, and expected result of the match. Since this ranking has not yet been introduced the basis of this analysis will compare the results to the pre-2018 rankings.<br>
 
 
 # Project Overview
@@ -57,9 +33,9 @@ Combine the international match outcome and FIFA rankings data sets for matches 
 Part 2 : Developing Model with Elo Ranking <br><br>
 Replace the FIFA rankings in Part 1 with an Elo based scoring model and assess improvement, if any, on the overall classification accuracy on the same test set used in part 1. <br><br>
 Part 3 : Ensemble Models <br>
-The optimal combination of features from parts 1 and 2 (may include FIFA rank, Elo score, or both) will be used to train a variety of classification models (Random Forest, xgboost, LDA, QDA, KNN, etc.). The probabilistic results for each match (win, tie, loss) will be blended with the results of a Poisson Distribution model that uses the complete player ranking data scraped from sofifa.com for the FIFA 2018 video game to predict the group stages of the 2018 FIFA World Cup. <br><br>
+The features developed in Part 2 will be used to train a variety of classification models (Random Forest, LDA, QDA, KNN). The results for each match will be blended to create an ensemble meta-classifier and see if we can improve the test set results from the single decision tree classifer. <br><br>
 Part 4 : Predicting the 2018 World Cup<br>
-The knockout stages of the world cup will be simulated 1000 times to determine the probability of each team winning the tournament. Matches that result in a tie during the knockout stages will take into account the average penalty rating of the top 5 penalty shooters for each time from the sofifa.com data set to break the tie. The final result will be the probability of each of the 32 teams that qualified for the 2018 World Cup to win the tournament.<br><br>
+Lastly, the group stages of the World Cup will be predicted via the best classification model in Part 3. The knockout stages of the world cup will be simulated. Matches that result in a tie during the knockout stages will take into account the average penalty rating of the top 5 penalty shooters for each time from the sofifa.com data set to break the tie. <br><br>
 
 # Part 1: Baseline Model
 ## Load, Clean and Merge Data
@@ -137,7 +113,7 @@ results_df = results_df.merge(country_df,
 ```
 
 ### Comments
-Generate additional features
+Generate some additional features
 
 ```python
 results_df['rank_difference'] = results_df['rank_home'] - results_df['rank_away']
@@ -203,8 +179,7 @@ plt.show()
 ## Naive Model based on FIFA Ranking Only
 
 ### Comments
-1. Accuracy of FIFA Ranking at Predicting Winner: 21.88%<br>
-
+1. Accuracy of FIFA Ranking at Predicting Winner: 21.88%
 ```python
 results_df['fifa_correct_withDraws'] = ((results_df.home_score >= results_df.away_score) & (results_df.rank_home > results_df.rank_away)) | ((results_df.away_score >= results_df.home_score) & (results_df.rank_away > results_df.rank_home))
 results_df['fifa_correct'] = ((results_df.home_score > results_df.away_score) & (results_df.rank_home > results_df.rank_away)) | ((results_df.away_score > results_df.home_score) & (results_df.rank_away > results_df.rank_home))
@@ -229,6 +204,7 @@ print('Accuracy of FIFA Ranking at Predicting Winner (ignoring draws): {}%'
 2. Visualize Portugal game outcomes
 
 ### Comments
+Portugal matches result in a tie nearly 25% of the time. A multi-class predictor should be used to account for a win, loss, or draw. 
 ```python
 portugal = results_df[(results_df['home_team'] == 'Portugal') | (results_df['away_team'] == 'Portugal')]
 
@@ -258,9 +234,7 @@ sns.countplot(x='Portugal Results', data=winsdf)
 4. Show the number of observations for the test and training dataframes
 
 ```python
-no_draw_train_df = results_df[results_df['result'] != 0.5]
-
-train_df = no_draw_train_df[['rank_home','rank_away','neutral','previous_points_home','cur_year_avg_weighted_home',
+train_df = results_df[['rank_home','rank_away','neutral','previous_points_home','cur_year_avg_weighted_home',
                      'two_year_ago_weighted_home','three_year_ago_weighted_home','previous_points_away',
                      'cur_year_avg_weighted_away','two_year_ago_weighted_away','three_year_ago_weighted_away',
                      'rank_difference','average_rank','is_stake','result']]
@@ -407,9 +381,9 @@ def expected_result(elo_a, elo_b):
 The loop where it happens
 - We go through each row in the DataFrame.
 - We look up the current Elo rating of both teams.
-- We calculate the expected wins for the team that actually won.
+- We calculate the expected win and compare to the actual match result.
 - Write Elo before and after the game in the Data Frame.
-- Update the Elo rating for both teams in the "current_elos" list.
+- Update the Elo rating for both teams in the "elo_teams_df".
 
 ```python
 current_season = elo_games_df.date[:0].dt.year
@@ -492,8 +466,8 @@ plt.show()
 ![Elo6](/Images/elo6.PNG)
 
 ### Comments
-1. Number of Upsets based on FIFA Rank: 53.7%<br>
-2. Number of Upsets based on Elo Score: 20.3%<br>
+1. Number of Upsets based on FIFA Rank: 53.7%
+2. Number of Upsets based on Elo Score: 20.3%
 
 ```python
 train_results_df['fifa_upsets'] = ((train_results_df.home_score_x > train_results_df.away_score_x) & \
@@ -514,10 +488,6 @@ print('Number of Upsets based on Elo Score: {}%'
 
 ```
 
-
-Number of Upsets based on FIFA Rank: 53.7%
-Number of Upsets based on Elo Score: 20.3%
-
 ## Comment
 1. Generate Additional Features
 2. Remove features without predictive value or not known prior to game start
@@ -531,10 +501,8 @@ Number of Upsets based on Elo Score: 20.3%
 train_results_df['elo_difference'] = train_results_df['home_elo_before_game'] - train_results_df['away_elo_before_game']
 train_results_df['average_elo'] = (train_results_df['home_elo_before_game'] + train_results_df['away_elo_before_game'])/2
 
-no_draw_train_df = train_results_df[train_results_df['result_x'] != 0.5]
-
 # remove features without predictive value or not known prior to game start
-train_elo_df = no_draw_train_df[['neutral','home_elo_before_game','away_elo_before_game','is_stake','elo_difference',
+train_elo_df = train_results_df[['neutral','home_elo_before_game','away_elo_before_game','is_stake','elo_difference',
                                  'average_elo','Region_Europe & Central Asia_home','Region_Latin America & Caribbean_home',
                                  'Region_Middle East & North Africa_home','Region_North America_home','Region_South Asia_home',
                                  'Region_Sub-Saharan Africa_home','IncomeGroup_High income: nonOECD_home',
@@ -564,15 +532,15 @@ print('Classification Accuracy on testing set: {}%\n'.format(round(baselineModel
 
 ```
 
-Decision Tree Classifier:<br>
-Classification Accuracy on training set: 74.12%<br>
-Classification Accuracy on testing set: 72.69%<br>
+Decision Tree Classifier:
+Classification Accuracy on training set: 74.12%
+Classification Accuracy on testing set: 72.69%
 
 # Part 3: Ensemble Models
 
 ## Ensemble Learners
 
-The optimal combination of features from parts 1 and 2 (may include FIFA rank, Elo score, or both) will be used to train a variety of classification models (Random Forest, xgboost, LDA, QDA, KNN, etc.). The probabilistic results for each match (win, tie, loss) will be blended with the results of a Poisson Distribution model that uses the complete player ranking data scraped from sofifa.com for the FIFA 2018 video game to predict the group stages of the 2018 FIFA World Cup. The knockout stages of the world cup will be simulated 1000 times to determine the probability of each team winning the tournament. Matches that result in a tie during the knockout stages will take into account the average penalty rating of the top 5 penalty shooters for each time from the sofifa.com data set to break the tie. The final result will be the probability of each of the 32 teams that qualified for the 2018 World Cup to win the tournament.
+The training features from part 2 will be used to train a variety of classification models (Random Forest, LDA, QDA, KNN). The results for each match will be blended to create an ensemble meta-classifier and see if we can improve the test set results from the single decision tree classifer.
 
 ## RandomForestClassifier
 
@@ -719,41 +687,10 @@ The optimal number of neighbors is: 38
 
 ![KNN Neighbours](/Images/model3.PNG)
 
-### XGBoost
-
-### Comments
-1. Find Optimum Depth
-2. Plot depths
-
-```python
-from xgboost import XGBClassifier
-
-depth = list(range(1,11))
-cv_scores = []
-for d in depth:
-    xgb = XGBClassifier(max_depth=d)
-    scores = cross_val_score(xgb, train_features, train_labels, cv=10, scoring='accuracy')
-    cv_scores.append(scores.mean())
-    
-# determining best depth
-optimal_depth = depth[cv_scores.index(max(cv_scores))]
-print('The optimal max depth for XGB model is: {}'.format(optimal_depth))
-
-# plot classification accuracy vs depth
-plt.plot(depth, cv_scores)
-plt.xlabel('Max Tree Depth')
-plt.ylabel('Classification Accuracy')
-plt.show()
-```
-
-The optimal max depth for XGB model is: 3
-
-![XGBoost](/Images/model4.PNG)
-
 ### Build Ensemble
 
 ### Comments
-1. Build Models : LDA, QDA, KNN, XGB
+1. Build Models : LDA, QDA, KNN, RF
 2. Get accuracy of each
 
 ```python
@@ -764,25 +701,22 @@ from sklearn.neighbors import KNeighborsClassifier
 lda = LinearDiscriminantAnalysis().fit(train_features, train_labels)
 qda = QuadraticDiscriminantAnalysis().fit(train_features, train_labels)
 knn = KNeighborsClassifier(n_neighbors=23).fit(train_features, train_labels)
-xgb = XGBClassifier(max_depth=2).fit(train_features, train_labels)
 
 print('LDA Test Accuracy: {}%'.format(round(lda.score(test_features, test_labels)*100,2)))
 print('QDA Test Accuracy: {}%'.format(round(qda.score(test_features, test_labels)*100,2)))
 print('KNN Test Accuracy: {}%'.format(round(knn.score(test_features, test_labels)*100,2)))
-print('XGB Test Accuracy: {}%'.format(round(xgb.score(test_features, test_labels)*100,2)))
 ```
-LDA Test Accuracy: 74.14%<br>
-QDA Test Accuracy: 55.39%<br>
-KNN Test Accuracy: 72.13%<br>
-XGB Test Accuracy: 74.28%<br>
+LDA Test Accuracy: 74.14%
+QDA Test Accuracy: 55.39%
+KNN Test Accuracy: 72.13%
 
 ### Comments
 1. Assemble model predictions to train and test model dataframes
 2. Augment training and test dataframes to corresponding prediction model dataframe
 
 ```python
-model_names = ['lda', 'qda', 'knn', 'xgb']
-models = [lda, qda, knn, xgb]
+model_names = ['lda', 'qda', 'knn']
+models = [lda, qda, knn]
 
 ensemble_tune = []
 ensemble_test = []
@@ -810,16 +744,16 @@ print('Augmented Decision Meta-Tree Classifier:')
 print('Classification Accuracy on test set: {}%\n'.format(round(augmentedModel_dt.score(augmented_test, test_labels)*100, 2)))
 ```
 
-Augmented Decision Meta-Tree Classifier:<br>
-Classification Accuracy on test set: 72.45%<br>
+Augmented Decision Meta-Tree Classifier:
+Classification Accuracy on test set: 72.45%
 
 ### Comments
 1. Rebuild model this time without QDA
 2. Augment training and test dataframes to corresponding prediction model dataframe
 
 ```python
-model_names = ['lda', 'knn', 'xgb']
-models = [lda, knn, xgb]
+model_names = ['lda', 'knn', 'rf']
+models = [lda, knn, rf]
 
 ensemble_tune = []
 ensemble_test = []
@@ -1009,7 +943,8 @@ scoreboard_df
 
 ### Comments
 1. Compute Round of 16
-2. Predict Round of 16
+2. Define function for getting the average penalty rating of the top 5 players per team
+2. Simulate Round of 16
 
 ```python
 round_of_16_games = [(0, 5), (8, 13),
@@ -1017,12 +952,6 @@ round_of_16_games = [(0, 5), (8, 13),
                      (4, 1), (12, 9),
                      (20, 17), (28, 25)]
 
-round_of_8_games = [(0, 1), (2, 3),
-                     (4, 5), (6, 7)]
-
-semifinal_games = [(0, 1), (2, 3)]
-
-final_game = [(0, 1)]
 players_df = pd.read_csv('CompleteFIFA2018PlayerDataset.csv', low_memory=False)
 
 def get_team_penalties(team):
@@ -1056,10 +985,10 @@ for match in round_of_16_games:
     
     print('{} vs. {}'.format(home_team, away_team))
     
-    if expected_win > 0.7:
+    if expected_win > 0.6:
         print('{} wins in regulation time\n'.format(home_team))
         winners.append(home_team)
-    elif expected_win < 0.3:
+    elif expected_win < 0.4:
         print('{} wins in regulation time\n'.format(away_team))
         winners.append(away_team)
     else:
@@ -1068,32 +997,32 @@ for match in round_of_16_games:
         winners.append(winning_team)
 ```
 Egypt vs. Portugal<br>
-Egypt wins in OT/PK<br>
+Portugal wins in regulation time<br><br>
 
 France vs. Argentina<br>
-Argentina wins in OT/PK<br>
+Argentina wins in OT/PK<br><br>
 
 Costa Rica vs. Sweden<br>
-Sweden wins in regulation time<br>
+Sweden wins in regulation time<br><br>
 
 Belgium vs. Japan<br>
-Belgium wins in regulation time<br>
+Belgium wins in regulation time<br><br>
 
-Spain vs. Russia<br>
-Spain wins in OT/PK<br>
+Spain vs. Saudi Arabia<br>
+Spain wins in regulation time<br><br>
 
-Iceland vs. Peru<br>
-Iceland wins in OT/PK<br>
+Nigeria vs. Peru<br>
+Peru wins in OT/PK<br><br>
 
 Germany vs. Switzerland<br>
-Germany wins in OT/PK<br>
+Germany wins in regulation time<br><br>
 
 Colombia vs. Panama<br>
 Colombia wins in regulation time<br>
 
 ### Comments
 1. Compute Round of 8
-2. Predict Round of 8
+2. Simulate Round of 8
 
 ```python
 round_of_8_games = np.array(winners).reshape(4,2)
@@ -1113,10 +1042,10 @@ for match in round_of_8_games:
     
     print('{} vs. {}'.format(home_team, away_team))
     
-    if expected_win > 0.7:
+    if expected_win > 0.6:
         print('{} wins in regulation time\n'.format(home_team))
         winners.append(home_team)
-    elif expected_win < 0.3:
+    elif expected_win < 0.4:
         print('{} wins in regulation time\n'.format(away_team))
         winners.append(away_team)
     else:
@@ -1125,18 +1054,18 @@ for match in round_of_8_games:
         winners.append(winning_team)
 
 ```
-
-Egypt vs. Argentina<br>
-Argentina wins in OT/PK<br>
+Portugal vs. Argentina<br>
+Argentina wins in OT/PK<br><br>
 
 Sweden vs. Belgium<br>
-Sweden wins in OT/PK<br>
+Sweden wins in OT/PK<br><br>
 
-Spain vs. Iceland<br>
-Spain wins in regulation time<br>
+Spain vs. Peru<br>
+Spain wins in regulation time<br><br>
 
 Germany vs. Colombia<br>
-Colombia wins in OT/PK<br>
+Colombia wins in OT/PK<br><br>
+
 
 ### Comments
 1. Compute SemiFinal
@@ -1179,7 +1108,6 @@ Spain vs. Colombia
 Colombia wins in OT/PK
 
 
-
 ### Comments
 1. Compute Finals
 2. Predict Finals Outcome
@@ -1211,11 +1139,11 @@ else:
 
 2018 World Cup Final<br>
 
-Argentina vs. Colombia<br><br>
-**Argentina wins in OT/PK**<br>
+Argentina vs. Spain<br>
+Spain wins in regulation time<br>
 
 
-# Literature Review
+# Literature Review and References
 
 1.	Zeileis A, Leitner C, Hornik K (2018). "Probabilistic Forecasts for the 2018 FIFA World Cup Based on the Bookmaker Consensus Model", Working Paper 2018-09, Working Papers in Economics and Statistics, Research Platform Empirical and Experimental Economics, UniversitÃd’t Innsbruck. https://www2.uibk.ac.at/downloads/c4041030/wpaper/2018-09.pdf
 2.	Goldman-Sachs Global Investment Research (2014). “The World Cup and Economics 2014.” Accessed 2018-07-11, http://www.goldmansachs.com/our-thinking/outlook/ world-cup-and-economics-2014-folder/world-cup-economics-report.pdf
