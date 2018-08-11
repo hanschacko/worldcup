@@ -253,6 +253,7 @@ sns.countplot(x='Portugal Results', data=winsdf)
 2. Split training set in features/labels
 3. Split the data into training and testing sets
 4. Show the number of observations for the test and training dataframes
+
 ```python
 no_draw_train_df = results_df[results_df['result'] != 0.5]
 
@@ -264,8 +265,8 @@ train_features, test_features, train_labels, test_labels = train_test_split(feat
                                                                             random_state = 42)
 print('Number of observations in the training data:', len(train_labels))
 print('Number of observations in the test data:',len(test_labels))
-
 ```
+
 Number of observations in the training data: 8513
 Number of observations in the test data: 2838
 
@@ -312,12 +313,14 @@ print('Decision Tree Classifier (FIFA rank only):')
 print('Classification Accuracy on training set: {}%'.format(round(baselineModel.score(train_features, train_labels,)*100, 2)))
 print('Classification Accuracy on testing set: {}%\n'.format(round(baselineModel.score(test_features, test_labels,)*100, 2)))
 ```
+
 Decision Tree Classifier (FIFA rank only):
 Classification Accuracy on training set: 75.17%
 Classification Accuracy on testing set: 74.21%
 
 ### Comments
 1. View the decision tree for baseline model
+
 ```python
 from sklearn.externals.six import StringIO  
 from IPython.display import Image  
@@ -340,6 +343,7 @@ conda_fix(graph)
 # View the decision tree for baseline model
 Image(graph.create_png())
 ```
+
 ![Baseline Tree](/Images/BaselineTree.png)
 
 # Part 2: Developing Model with Elo Ranking
@@ -348,10 +352,12 @@ Image(graph.create_png())
 The Elo rating system is a method for calculating the relative skill levels of teams (or players) in zero-sum games. From Wikipedia, a team's Elo rating as applied to our data set is represented by a number which increases or decreases depending on the outcome of matches between international teams. After every game, the winning team takes points from the losing one. The difference between the ratings of the winner and loser determines the total number of points gained or lost after a game. In a series of games between a high-rated team and a low-rated team, the high-rated team is expected to score more wins. If the high-rated team wins, then only a few rating points will be taken from the low-rated team. However, if the lower rated team scores an upset win, many rating points will be transferred. The lower rated team will also gain a few points from the higher rated team in the event of a draw. This means that this rating system is self-correcting. A team whose rating is too low should, in the long run, do better than the rating system predicts, and thus gain rating points until the rating reflects their true playing strength. The elo function that we used resembles the Elo World Ranking which is defined below:
 
 ![Elo1](/Images/elo1.PNG)
+
 ![Elo2](/Images/elo2.PNG)
+
 ![Elo3](/Images/elo3.PNG)
 
-## Comment
+## Comments
 1. Set some constants
 2. Define function to Update ELO
 3. Define function to get Expected result
@@ -482,9 +488,10 @@ plt.show()
 ```
 ![Elo6](/Images/elo6.PNG)
 
-## Comment
+### Comments
 1. Number of Upsets based on FIFA Rank: 53.7%
 2. Number of Upsets based on Elo Score: 20.3%
+
 ```python
 train_results_df['fifa_upsets'] = ((train_results_df.home_score_x > train_results_df.away_score_x) & \
                               (train_results_df.rank_home < train_results_df.rank_away)) | \
@@ -559,12 +566,15 @@ Classification Accuracy on training set: 74.12%
 Classification Accuracy on testing set: 72.69%
 
 # Part 3: Ensemble Models
+
 ## Ensemble Learners
+
 The optimal combination of features from parts 1 and 2 (may include FIFA rank, Elo score, or both) will be used to train a variety of classification models (Random Forest, xgboost, LDA, QDA, KNN, etc.). The probabilistic results for each match (win, tie, loss) will be blended with the results of a Poisson Distribution model that uses the complete player ranking data scraped from sofifa.com for the FIFA 2018 video game to predict the group stages of the 2018 FIFA World Cup. The knockout stages of the world cup will be simulated 1000 times to determine the probability of each team winning the tournament. Matches that result in a tie during the knockout stages will take into account the average penalty rating of the top 5 penalty shooters for each time from the sofifa.com data set to break the tie. The final result will be the probability of each of the 32 teams that qualified for the 2018 World Cup to win the tournament.
 
 ## RandomForestClassifier
 
 ### Comments
+
 ```python
 # Import the model we are using
 from sklearn.ensemble import RandomForestClassifier
@@ -580,6 +590,7 @@ rf.predict_proba(test_features)[0:10]
 pd.crosstab(test_labels, predictions, rownames=['Actual Outcome'], colnames=['Predicted Outcome']).apply(lambda r: r/r.sum(), axis=1)
 from sklearn.metrics import accuracy_score
 ```
+
 ![Random Forest Accuracy Score](/Images/model1.PNG)
 
 ### Comments
@@ -609,6 +620,7 @@ feature_importances = sorted(feature_importances, key = lambda x: x[1], reverse 
 # Print out the feature and importances 
 [print('Variable: {:30} Importance: {}'.format(*pair)) for pair in feature_importances];
 ```
+
 Variable: elo_difference                 Importance: 0.26<br>
 Variable: away_elo_before_game           Importance: 0.19<br>
 Variable: home_elo_before_game           Importance: 0.18<br>
@@ -644,6 +656,7 @@ from sklearn.decomposition import PCA
 pca_5_transformer = PCA(5).fit(train_features)
 np.cumsum(pca_5_transformer.explained_variance_ratio_)
 ```
+
 array([0.56661497, 0.99997483, 0.99997933, 0.99998319, 0.99998541])
 
 ### Comments
@@ -729,6 +742,7 @@ plt.xlabel('Max Tree Depth')
 plt.ylabel('Classification Accuracy')
 plt.show()
 ```
+
 The optimal max depth for XGB model is: 3
 
 ![XGBoost](/Images/model4.PNG)
@@ -792,6 +806,7 @@ augmentedModel_dt = DecisionTreeClassifier(max_depth=4).fit(augmented_tune, trai
 print('Augmented Decision Meta-Tree Classifier:')
 print('Classification Accuracy on test set: {}%\n'.format(round(augmentedModel_dt.score(augmented_test, test_labels)*100, 2)))
 ```
+
 Augmented Decision Meta-Tree Classifier:
 Classification Accuracy on test set: 72.45%
 
@@ -829,6 +844,7 @@ augmentedModel_dt = DecisionTreeClassifier(max_depth=4).fit(augmented_tune, trai
 print('Augmented Decision Meta-Tree Classifier:')
 print('Classification Accuracy on test set: {}%\n'.format(round(augmentedModel_dt.score(augmented_test, test_labels)*100, 2)))
 ```
+
 Augmented Decision Meta-Tree Classifier:
 Classification Accuracy on test set: 73.47%
 
@@ -843,6 +859,7 @@ wc2018_df = pd.read_csv('2018WorldCupGroupSchedule-withResults.csv')
 wc2018_df['Date'] = pd.to_datetime(wc2018_df['Date'])
 wc2018_df.head()
 ```
+
 ![World Cup Results](/Images/wc1.PNG)
 
 ## Feature Engineering
@@ -918,8 +935,6 @@ wc2018_test_df = wc2018_elo_df[['neutral','home_elo_before_game','away_elo_befor
 # Select features in the same order as used for training
 wc2018_features = wc2018_test_df.drop(['result'], axis = 1)
 wc2018_labels = np.asarray(wc2018_elo_df['result'], dtype="|S6")
-
-
 
 ```
 
