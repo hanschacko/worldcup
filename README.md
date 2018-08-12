@@ -62,10 +62,6 @@ results_df = pd.read_csv('InternationalResultsFrom1993to2018.csv')
 results_df =  results_df.replace({'Germany DR': 'Germany', 'China': 'China PR'})
 results_df['date'] = pd.to_datetime(results_df['date'])
 results_df.head()
-
-results_df = pd.read_csv('InternationalResultsFrom1993to2018.csv')
-results_df =  results_df.replace({'Germany DR': 'Germany', 'China': 'China PR'})
-results_df['date'] = pd.to_datetime(results_df['date'])
 ```
 
 ![Historical Results](/Images/HistoricalResults.PNG)
@@ -707,9 +703,9 @@ print('LDA Test Accuracy: {}%'.format(round(lda.score(test_features, test_labels
 print('QDA Test Accuracy: {}%'.format(round(qda.score(test_features, test_labels)*100,2)))
 print('KNN Test Accuracy: {}%'.format(round(knn.score(test_features, test_labels)*100,2)))
 ```
-LDA Test Accuracy: 74.14%
-QDA Test Accuracy: 55.39%
-KNN Test Accuracy: 72.13%
+LDA Test Accuracy: 74.14%<br>
+QDA Test Accuracy: 55.39%<br>
+KNN Test Accuracy: 72.13%<br>
 
 ### Comments
 1. Assemble model predictions to train and test model dataframes
@@ -891,7 +887,7 @@ print('Classification Accuracy on 2018 Group Stage: {}%'.format(round(lda.score(
                                                                                           wc2018_labels)*100, 2)))
                                                                                           
 ```
-Classification Accuracy on 2018 Group Stage: 52.08%
+Classification Accuracy on 2018 Group Stage: 52.08% <br><br>
 
 The LDA model achieved the highest out-of-sample test accuracy in Part 3 and it performed about as well on the 2018 Group Stage matches as it did on the test set during Part 3.
 
@@ -998,25 +994,25 @@ for match in round_of_16_games:
         winners.append(winning_team)
 ```
 Egypt vs. Portugal<br>
-Portugal wins in regulation time<br><br>
+Portugal wins in regulation time<br>
 
 France vs. Argentina<br>
-Argentina wins in OT/PK<br><br>
+Argentina wins in OT/PK<br>
 
 Costa Rica vs. Sweden<br>
-Sweden wins in regulation time<br><br>
+Sweden wins in regulation time<br>
 
 Belgium vs. Japan<br>
-Belgium wins in regulation time<br><br>
+Belgium wins in regulation time<br>
 
 Spain vs. Saudi Arabia<br>
-Spain wins in regulation time<br><br>
+Spain wins in regulation time<br>
 
 Nigeria vs. Peru<br>
-Peru wins in OT/PK<br><br>
+Peru wins in OT/PK<br>
 
 Germany vs. Switzerland<br>
-Germany wins in regulation time<br><br>
+Germany wins in regulation time<br>
 
 Colombia vs. Panama<br>
 Colombia wins in regulation time<br>
@@ -1056,16 +1052,16 @@ for match in round_of_8_games:
 
 ```
 Portugal vs. Argentina<br>
-Argentina wins in OT/PK<br><br>
+Argentina wins in OT/PK<br>
 
 Sweden vs. Belgium<br>
-Sweden wins in OT/PK<br><br>
+Sweden wins in OT/PK<br>
 
 Spain vs. Peru<br>
-Spain wins in regulation time<br><br>
+Spain wins in regulation time<br>
 
 Germany vs. Colombia<br>
-Colombia wins in OT/PK<br><br>
+Colombia wins in OT/PK<br>
 
 
 ### Comments
@@ -1102,11 +1098,11 @@ for match in semifinal_games:
         winners.append(winning_team)
 
 ```
-Argentina vs. Sweden
-Argentina wins in OT/PK
+Argentina vs. Sweden<br>
+Argentina wins in OT/PK<br>
 
-Spain vs. Colombia
-Colombia wins in OT/PK
+Spain vs. Colombia<br>
+Colombia wins in OT/PK<br>
 
 
 ### Comments
@@ -1138,7 +1134,7 @@ else:
     winners.append(winning_team)
 ```
 
-2018 World Cup Final<br>
+2018 World Cup Final<br><br>
 
 Argentina vs. Spain<br>
 Spain wins in regulation time<br>
