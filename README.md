@@ -41,7 +41,7 @@ Lastly, the group stages of the World Cup will be predicted via the best classif
 ## Load, Clean and Merge Data
 
 ### Comments
-1. Load historical FIFA rankings (1993-present) dataset into pandas dataframe
+1. Load historical FIFA rankings (1993-2018) dataset into pandas dataframe
 ```python
 # load historical FIFA rankings (1993-present) dataset into pandas dataframe
 fifaRank_df = pd.read_csv('FifaRanking1993to2018_Tadhg Fitzgerald.csv')
@@ -54,8 +54,7 @@ fifaRank_df.head()
 ![Historical Rankings](/Images/HistoricalRankings.PNG)
 
 ### Comments
-1. Load international match results (1872-2018) dataset into pandas dataframe
-
+1. Load international match results (1993-2018) dataset into pandas dataframe
 
 ```python
 results_df = pd.read_csv('InternationalResultsFrom1993to2018.csv')
@@ -109,7 +108,7 @@ results_df = results_df.merge(country_df,
 ```
 
 ### Comments
-Generate some additional features
+1. Generate additional features : rank_difference, average_rank, score_difference, is_stake, total_goals, year
 
 ```python
 results_df['rank_difference'] = results_df['rank_home'] - results_df['rank_away']
@@ -139,7 +138,7 @@ results_df['result'] = result
 
 ### Comments
 1. Plot International Matches played between 1993-2018: 14997
-2. Total International Matches played by 2018 World Cup teams between 1993-2018: 14997
+2. Total International Matches played by '2018 World Cup teams' between 1993-2018: 14997
 
 ```python
 plt.figure(figsize=(12, 8), dpi= 80)
@@ -153,7 +152,7 @@ plt.show()
 ![Home Team International Matches Outcomes](/Images/HomeTeamInternationalMatchOutcomes.png)
 
 ### Comments
-Plot Number of International Matches per Year
+1. Plot Number of International Matches per Year
 
 ```python
 games_per_year = results_df.groupby(['year'])['year'].count()
@@ -176,6 +175,7 @@ plt.show()
 
 ### Comments
 1. Accuracy of FIFA Ranking at Predicting Winner: 21.88%
+
 ```python
 results_df['fifa_correct_withDraws'] = ((results_df.home_score >= results_df.away_score) & (results_df.rank_home > results_df.rank_away)) | ((results_df.away_score >= results_df.home_score) & (results_df.rank_away > results_df.rank_home))
 results_df['fifa_correct'] = ((results_df.home_score > results_df.away_score) & (results_df.rank_home > results_df.rank_away)) | ((results_df.away_score > results_df.home_score) & (results_df.rank_away > results_df.rank_home))
@@ -196,7 +196,7 @@ print('Accuracy of FIFA Ranking at Predicting Winner (ignoring draws): {}%'
 ```
 
 ## Visualize Subset of Data for Portugal Matches Only
-1. Let's work with a subset of the data that includes games played by Portugal
+1. Sample subset of the data that includes games played by Portugal
 2. Visualize Portugal game outcomes
 
 ### Comments
@@ -240,7 +240,7 @@ print('Number of observations in the training data:', len(train_labels))
 print('Number of observations in the test data:',len(test_labels))
 ```
 
-Number of observations in the training data: 8513
+Number of observations in the training data: 8513<br>
 Number of observations in the test data: 2838
 
 ### Comments
@@ -274,7 +274,7 @@ plt.show()
 ```
 The optimal tree depth is: 5
 
-![Tree Depth](/Images/TreeDepth.png)
+![Tree Depth](/Images/TreeDepth.PNG)
 
 ### Comments
 1. Use cross-validation to build baseline model
@@ -541,6 +541,7 @@ The training features from part 2 will be used to train a variety of classificat
 ## RandomForestClassifier
 
 ### Comments
+1. Build RandomForestClassifier model
 
 ```python
 # Import the model we are using
@@ -561,7 +562,7 @@ from sklearn.metrics import accuracy_score
 ![Random Forest Accuracy Score](/Images/model1.PNG)
 
 ### Comments
-1. Test Accuracy
+1. Test Accuracy of RandomForestClassifier
 
 ```python
 # Test Accuracy
@@ -570,6 +571,7 @@ print('Test Accuracy: {}'.format(accuracy_score(test_labels, predictions)))
 Test Accuracy: 0.7258632840028189
 
 ### Important Features
+1. Capture the important features from RandomForestClassifier model training
 
 ```python
 # get feature names
@@ -616,6 +618,9 @@ Variable: Region_North America_away      Importance: 0.0<br>
 Variable: Region_South Asia_away         Importance: 0.0<br>
 
 ### PCA
+
+### Comments
+1. Fit PCA and capture explained variance ratios
 
 ```python
 from sklearn.decomposition import PCA
@@ -684,10 +689,10 @@ The optimal number of neighbors is: 38
 
 ![KNN Neighbours](/Images/model3.PNG)
 
-### Build Ensemble
+## Build Ensemble
 
 ### Comments
-1. Build Models : LDA, QDA, KNN, RF
+1. Build Models : LDA, QDA, KNN
 2. Get accuracy of each
 
 ```python
@@ -745,7 +750,7 @@ Augmented Decision Meta-Tree Classifier:
 Classification Accuracy on test set: 72.45%
 
 ### Comments
-1. Rebuild model this time without QDA
+1. Rebuild models this time without QDA and adding RF
 2. Augment training and test dataframes to corresponding prediction model dataframe
 
 ```python
@@ -788,6 +793,7 @@ Classification Accuracy on test set: 73.47%
 
 ### Comments
 1. Load World Cup Schedule with Results into a dataframe
+
 ```python
 wc2018_df = pd.read_csv('2018WorldCupGroupSchedule-withResults.csv')
 wc2018_df['Date'] = pd.to_datetime(wc2018_df['Date'])
@@ -797,8 +803,8 @@ wc2018_df.head()
 ![World Cup Results](/Images/wc1.PNG)
 
 ## Feature Engineering
-
 ### Comments
+
 1. Prepare Dataframes for Elo Rankings
 2. Update Elos
 3. Join region and income group data
