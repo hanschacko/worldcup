@@ -656,7 +656,7 @@ plt.ylabel("PCA Dimention 2")
 plt.legend()
 plt.show()
 ```
-![PCA](/Images/model2.PNG)
+![PCA](/Images/model5.PNG)
 
 ### KNN
 
