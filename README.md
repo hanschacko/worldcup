@@ -741,6 +741,8 @@ pd.crosstab(test_labels, predictions, rownames=['Actual Outcome'], \
 
 # Part 4: Predicting the 2018 World Cup 
 
+We start by loading the group stage matches for the 2018 World cup and predicting the outcomes via the Linear Discriminant Analysis model which had the best out-of-sample error of all the models trained in Part 3.
+
 ## Load 2018 World Cup Schedule with Results
 
 ### Comments
@@ -754,14 +756,18 @@ wc2018_df.head()
 
 ![World Cup Results](/Images/wc1.PNG)
 
+
+We need to compute the Elo rankings and transform the group stage matches into the same features that the model was trained on to predict the match outcomes.
+
 ## Feature Engineering
 ### Comments
-
 1. Prepare Dataframes for Elo Rankings
 2. Update Elos
 3. Join region and income group data
 4. Add additional features to match the test set
-5. Capture Classification Accuracy of 2018 Group Stage
+5. Make home and away predictions using statsmodel
+6. Update wc2018 features with predicted home and away scores
+
 
 ```python
 # prepare dataframes for Elo Rankings
@@ -841,8 +847,7 @@ prediction_away_score = np.round(model_away.predict(X),0)
 wc2018_features['pred_home_score'] = prediction_home_score
 wc2018_features['pred_away_score'] = prediction_away_score
 
-print('Classification Accuracy on 2018 Group Stage: {}%'.format(round(lda.score(wc2018_features, \
-                                                                                          wc2018_labels)*100, 2)))
+
                                                                                           
 ```
 Classification Accuracy on 2018 Group Stage: 52.08% <br><br>
@@ -850,8 +855,18 @@ Classification Accuracy on 2018 Group Stage: 52.08% <br><br>
 The LDA model achieved the highest out-of-sample test accuracy in Part 3 and it performed about as well on the 2018 Group Stage matches as it did on the test set during Part 3.
 
 
+## Group Stages Predictions
+
 ### Comments
-1. Compute scores for the Group Stage to determine the group winners going to Knockout rounds
+1. Capture classification accuracy for group stages ( 32 teams )
+
+```python
+print('Classification Accuracy on 2018 Group Stage: {}%'.format(round(lda.score(wc2018_features, \
+                                                                                          wc2018_labels)*100, 2)))
+```
+
+### Comments
+1. Compute points for the Group Stage to determine the group winners going to Knockout rounds
 
 ```python
 wc2018_elo_df['model_pred'] = np.asarray(baselineModel.predict(wc2018_features), dtype='float')
@@ -895,11 +910,13 @@ scoreboard_df
 
 ![World Cup Results](/Images/wc2.PNG)
 
+## Round of 16 Predictions
 
 ### Comments
-1. Compute Round of 16
-2. Define function for getting the average penalty rating of the top 5 players per team
-2. Simulate Round of 16
+1. Since draws are common, we have some code to compare the penalty stats for teams in the event of a draw.
+2. Compute Round of 16
+3. Define function for getting the average penalty rating of the top 5 players per team
+4. Simulate Round of 16
 
 ```python
 round_of_16_games = [(0, 5), (8, 13),
@@ -975,13 +992,26 @@ Germany wins in regulation time<br>
 Colombia vs. Panama<br>
 Colombia wins in regulation time<br>
 
+
+## Round of 18 Predictions
+
 ### Comments
-1. Compute Round of 8
-2. Simulate Round of 8
+1. Prepare for round of 8 games
+
 
 ```python
 round_of_8_games = np.array(winners).reshape(4,2)
+round_of_8_games
+```
+array([['Portugal', 'Argentina'], <br>
+       ['Sweden', 'Belgium'], <br>
+       ['Spain', 'Peru'], <br>
+       ['Germany', 'Colombia']], dtype='<U9') <br>
 
+### Comments
+1. Simulate Round of 8
+
+```python
 winners = []
 
 for match in round_of_8_games:
@@ -1021,14 +1051,21 @@ Spain wins in regulation time<br>
 Germany vs. Colombia<br>
 Colombia wins in OT/PK<br>
 
+## Semi Final Predictions
 
 ### Comments
-1. Compute SemiFinal
-2. Predict SemiFinal Outcome
-
+1. Prepare for Semi-Final games
 ```python
 semifinal_games = np.array(winners).reshape(2,2)
+semifinal_games
+```
+array([['Argentina', 'Sweden'],<br>
+       ['Spain', 'Colombia']], dtype='<U9')<br>
+       
+### Comments
+1. Simulate Semi-Final games
 
+```python
 winners = []
 
 for match in semifinal_games:
@@ -1062,6 +1099,7 @@ Argentina wins in OT/PK<br>
 Spain vs. Colombia<br>
 Colombia wins in OT/PK<br>
 
+## Finals Predictions
 
 ### Comments
 1. Compute Finals
