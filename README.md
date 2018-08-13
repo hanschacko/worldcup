@@ -536,7 +536,7 @@ model_home.summary()
 ```
 
 ![Elo6](/Images/elo9.PNG)
-![Elo6](/Images/elo10.PNG)
+![Elo6](/Images/elo11.PNG)
 
 ### Comments
 1. Print Model: Away summary
