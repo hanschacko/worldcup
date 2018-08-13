@@ -601,9 +601,7 @@ Decision Tree Classifier:
 Classification Accuracy on training set: 56.48%
 Classification Accuracy on testing set: 55.06%
 
-# Part 3: Ensemble Models
-
-## Ensemble Learners
+# Part 3: Ensemble Learners
 
 The training features from part 2 will be used to train a variety of classification models (Random Forest, LDA, QDA, KNN). The results for each match will be blended to create an ensemble meta-classifier and see if we can improve the test set results from the single decision tree classifer.
 
