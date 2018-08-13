@@ -1060,7 +1060,7 @@ Colombia vs. Panama<br>
 Colombia wins in regulation time<br>
 
 
-## Round of 18 Predictions
+## Quarter Finals Predictions
 
 ### Comments
 1. Prepare for round of 8 games
@@ -1118,7 +1118,7 @@ Spain wins in regulation time<br>
 Germany vs. Colombia<br>
 Colombia wins in OT/PK<br>
 
-## Semi Final Predictions
+## Semi Finals Predictions
 
 ### Comments
 1. Prepare for Semi-Final games
