@@ -535,8 +535,8 @@ prediction_away_score = np.round(model_away.predict(X),0)
 model_home.summary()
 ```
 
-![Elo6](/Images/elo7.PNG)
-![Elo6](/Images/elo8.PNG)
+![Elo6](/Images/elo9.PNG)
+![Elo6](/Images/elo10.PNG)
 
 ### Comments
 1. Print Model: Away summary
