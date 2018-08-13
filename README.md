@@ -8,7 +8,7 @@ Team #12: Bruno Janota and Hans Chacko  <br>
 [Project Overview](#project-overview)<br>
 [Part 1: Baseline Model](#part-1-baseline-model)<br>
 [Part 2: Developing Model with Elo Ranking](#elo-ranking-system)<br>
-[Part 3: Ensemble Models](#part-3-ensemble-models)<br>
+[Part 3: Ensemble Learners](#part-3-ensemble-learners)<br>
 [Part 4: Predicting the 2018 World Cup](#part-4-predicting-the-2018-world-cup)<br>
 
 
@@ -32,7 +32,7 @@ Part 1 : Baseline Model <br>
 Combine the international match outcome and FIFA rankings data sets for matches between 1993 and 2018. Perform some basic feature engineering to add additional features. Lastly, perform a 70/30% train/test set split and evaluate the performance of a Random Forest model on the overall classification accuracy on the test set. This will be the baseline model.<br><br>
 Part 2 : Developing Model with Elo Ranking <br><br>
 Replace the FIFA rankings in Part 1 with an Elo based scoring model and assess improvement, if any, on the overall classification accuracy on the same test set used in part 1. <br><br>
-Part 3 : Ensemble Models <br>
+Part 3 : Ensemble Learners <br>
 The features developed in Part 2 will be used to train a variety of classification models (Random Forest, LDA, QDA, KNN). The results for each match will be blended to create an ensemble meta-classifier and see if we can improve the test set results from the single decision tree classifer. <br><br>
 Part 4 : Predicting the 2018 World Cup<br>
 Lastly, the group stages of the World Cup will be predicted via the best classification model in Part 3. The knockout stages of the world cup will be simulated. Matches that result in a tie during the knockout stages will take into account the average penalty rating of the top 5 penalty shooters for each time from the sofifa.com data set to break the tie. <br><br>
@@ -538,56 +538,72 @@ Classification Accuracy on testing set: 72.69%
 
 The training features from part 2 will be used to train a variety of classification models (Random Forest, LDA, QDA, KNN). The results for each match will be blended to create an ensemble meta-classifier and see if we can improve the test set results from the single decision tree classifer.
 
+### PCA
+
+### Comments
+1. Fit PCA and capture explained variance ratios
+
+```python
+from sklearn.decomposition import PCA
+
+pca_5_transformer = PCA(5).fit(train_features)
+np.cumsum(pca_5_transformer.explained_variance_ratio_)
+```
+
+array([0.56661497, 0.99997483, 0.99997933, 0.99998319, 0.99998541])
+
+### Comments
+1. Plot boundaries based on PCA transformation to 2 dimensions
+2. Based on the PCA plot, it looks like even the best classifier would struggle to achieve high accuracy given the large overlap between the win, loss, and tie class labels.
+
+```python
+pca_transformer = PCA(2).fit(train_features)
+x_train_2d = pca_transformer.transform(train_features)
+x_test_2d = pca_transformer.transform(test_features)
+
+# lists to track each group's plotting color and label
+colors = ['r', 'g', 'b']
+label_text = ['Loss', 'Draw', 'Win']
+
+plt.rcParams['figure.figsize'] = (10,8)
+
+# loop over the different groups
+for result in [0.0,0.5,1]:
+    result_df = x_train_2d[train_labels.astype(np.float) == result]
+    plt.scatter(result_df[:,0], result_df[:,1], c = colors[int(2*result)], label=label_text[int(2*result)])
+    
+# add labels
+plt.xlabel("PCA Dimension 1")
+plt.ylabel("PCA Dimention 2")
+plt.legend()
+plt.show()
+```
+![PCA](/Images/model5.PNG)
+
+
 ## RandomForestClassifier
 
 ### Comments
 1. Build RandomForestClassifier model
+2. Capture the important features from RandomForestClassifier model training
 
 ```python
 # Import the model we are using
 from sklearn.ensemble import RandomForestClassifier
 # Instantiate model with 500 decision trees
-rf = RandomForestClassifier(n_estimators = 500, random_state = 42)
+rf_full = RandomForestClassifier(n_estimators=500, random_state=42)
 # Train the model on training data
-rf.fit(train_features, train_labels);
-# Use the forest predict method on the test data
-predictions = rf.predict(test_features)
-# View the predicted probabilities of the first 10 observations
-rf.predict_proba(test_features)[0:10]
-# Create confusion matrix
-pd.crosstab(test_labels, predictions, rownames=['Actual Outcome'], colnames=['Predicted Outcome']).apply(lambda r: r/r.sum(), axis=1)
-from sklearn.metrics import accuracy_score
-```
-
-![Random Forest Accuracy Score](/Images/model1.PNG)
-
-### Comments
-1. Test Accuracy of RandomForestClassifier
-
-```python
-# Test Accuracy
-print('Test Accuracy: {}'.format(accuracy_score(test_labels, predictions)))
-```
-Test Accuracy: 0.7258632840028189
-
-### Important Features
-1. Capture the important features from RandomForestClassifier model training
-
-```python
+rf_full.fit(train_features, train_labels);
 # get feature names
-feature_list = list(features.columns)
-
+feature_list = list(train_features.columns)
 # Get numerical feature importances
-importances = list(rf.feature_importances_)
-
+importances = list(rf_full.feature_importances_)
 # List of tuples with variable and importance
 feature_importances = [(feature, round(importance, 2)) for feature, importance in zip(feature_list, importances)]
-
 # Sort the feature importances by most important first
 feature_importances = sorted(feature_importances, key = lambda x: x[1], reverse = True)
-
 # Print out the feature and importances 
-[print('Variable: {:30} Importance: {}'.format(*pair)) for pair in feature_importances];
+[print('Variable: {:70} Importance: {}'.format(*pair)) for pair in feature_importances];
 ```
 
 Variable: elo_difference                 Importance: 0.26<br>
@@ -617,47 +633,7 @@ Variable: Region_South Asia_home         Importance: 0.0<br>
 Variable: Region_North America_away      Importance: 0.0<br>
 Variable: Region_South Asia_away         Importance: 0.0<br>
 
-### PCA
 
-### Comments
-1. Fit PCA and capture explained variance ratios
-
-```python
-from sklearn.decomposition import PCA
-
-pca_5_transformer = PCA(5).fit(train_features)
-np.cumsum(pca_5_transformer.explained_variance_ratio_)
-```
-
-array([0.56661497, 0.99997483, 0.99997933, 0.99998319, 0.99998541])
-
-### Comments
-1. Plot boundaries based on PCA transformation
-2. Based on the PCA plot, it looks like even the best classifier would struggle to achieve high accuracy given the large overlap between the win, loss, and tie class labels.
-
-```python
-pca_transformer = PCA(2).fit(train_features)
-x_train_2d = pca_transformer.transform(train_features)
-x_test_2d = pca_transformer.transform(test_features)
-
-# lists to track each group's plotting color and label
-colors = ['r', 'g', 'b']
-label_text = ['Loss', 'Draw', 'Win']
-
-plt.rcParams['figure.figsize'] = (10,8)
-
-# loop over the different groups
-for result in [0.0,0.5,1]:
-    result_df = x_train_2d[train_labels.astype(np.float) == result]
-    plt.scatter(result_df[:,0], result_df[:,1], c = colors[int(2*result)], label=label_text[int(2*result)])
-    
-# add labels
-plt.xlabel("PCA Dimension 1")
-plt.ylabel("PCA Dimention 2")
-plt.legend()
-plt.show()
-```
-![PCA](/Images/model5.PNG)
 
 ### KNN
 
@@ -685,40 +661,43 @@ plt.xlabel('Number of Neighbors K')
 plt.ylabel('Classification Accuracy')
 plt.show()
 ```
-The optimal number of neighbors is: 38
+The optimal number of neighbors is: 35
 
-![KNN Neighbours](/Images/model3.PNG)
+![KNN Neighbours](/Images/knn.PNG)
 
 ## Build Ensemble
 
 ### Comments
 1. Build Models : LDA, QDA, KNN
-2. Get accuracy of each
+2. Get accuracy of LDA, QDA, KNN and RandomForestClassifier
 
 ```python
 from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
 from sklearn.discriminant_analysis import QuadraticDiscriminantAnalysis
 from sklearn.neighbors import KNeighborsClassifier
 
-lda = LinearDiscriminantAnalysis().fit(train_features, train_labels)
-qda = QuadraticDiscriminantAnalysis().fit(train_features, train_labels)
-knn = KNeighborsClassifier(n_neighbors=23).fit(train_features, train_labels)
+lda = LinearDiscriminantAnalysis().fit(x_train_2d, train_labels)
+qda = QuadraticDiscriminantAnalysis().fit(x_train_2d, train_labels)
+knn = KNeighborsClassifier(n_neighbors=optimal_k).fit(x_train_2d, train_labels)
+rf = RandomForestClassifier(n_estimators=500).fit(x_train_2d, train_labels)
 
-print('LDA Test Accuracy: {}%'.format(round(lda.score(test_features, test_labels)*100,2)))
-print('QDA Test Accuracy: {}%'.format(round(qda.score(test_features, test_labels)*100,2)))
-print('KNN Test Accuracy: {}%'.format(round(knn.score(test_features, test_labels)*100,2)))
+print('LDA Test Accuracy: {}%'.format(round(lda.score(x_test_2d, test_labels)*100,2)))
+print('QDA Test Accuracy: {}%'.format(round(qda.score(x_test_2d, test_labels)*100,2)))
+print('KNN Test Accuracy: {}%'.format(round(knn.score(x_test_2d, test_labels)*100,2)))
+print('RF Test Accuracy: {}%'.format(round(rf.score(x_test_2d, test_labels)*100,2)))
 ```
-LDA Test Accuracy: 74.14%<br>
-QDA Test Accuracy: 55.39%<br>
-KNN Test Accuracy: 72.13%<br>
+LDA Test Accuracy: 54.7%<br>
+QDA Test Accuracy: 54.7%<br>
+KNN Test Accuracy: 54.14%<br>
+RF Test Accuracy: 48.95%<br>
 
 ### Comments
 1. Assemble model predictions to train and test model dataframes
 2. Augment training and test dataframes to corresponding prediction model dataframe
 
 ```python
-model_names = ['lda', 'qda', 'knn']
-models = [lda, qda, knn]
+model_names = ['lda', 'qda', 'knn', 'rf']
+models = [lda, qda, knn, rf]
 
 ensemble_tune = []
 ensemble_test = []
@@ -747,45 +726,18 @@ print('Classification Accuracy on test set: {}%\n'.format(round(augmentedModel_d
 ```
 
 Augmented Decision Meta-Tree Classifier:
-Classification Accuracy on test set: 72.45%
+Classification Accuracy on test set: 48.95%
 
 ### Comments
-1. Rebuild models this time without QDA and adding RF
-2. Augment training and test dataframes to corresponding prediction model dataframe
-
+1. Confusion Matrix on testset
 ```python
-model_names = ['lda', 'knn', 'rf']
-models = [lda, knn, rf]
-
-ensemble_tune = []
-ensemble_test = []
-
-for i in models:
-    ensemble_tune.append(i.predict(train_features))
-    ensemble_test.append(i.predict(test_features))
-
-ensemble_tune = np.array(ensemble_tune).reshape(len(models), len(train_features)).T
-ensemble_test = np.array(ensemble_test).reshape(len(models), len(test_features)).T
-
-# Convert ensemble tune/test to dataframes to concatenate
-ensemble_tune_df = pd.DataFrame(np.vstack(ensemble_tune), columns = model_names)
-ensemble_test_df = pd.DataFrame(np.vstack(ensemble_test), columns = model_names)
-
-# Concatenate x_tune/x_test with ensemble_tune/test
-train_features = train_features.reset_index(drop = True)
-test_features = test_features.reset_index(drop = True)
-
-augmented_tune = pd.concat([train_features, ensemble_tune_df], axis=1, join_axes=[train_features.index])
-augmented_test = pd.concat([test_features, ensemble_test_df], axis=1, join_axes=[test_features.index])
-
-augmentedModel_dt = DecisionTreeClassifier(max_depth=4).fit(augmented_tune, train_labels)
-
-print('Augmented Decision Meta-Tree Classifier:')
-print('Classification Accuracy on test set: {}%\n'.format(round(augmentedModel_dt.score(augmented_test, test_labels)*100, 2)))
+# Create confusion matrix
+predictions = lda.predict(test_features)
+pd.crosstab(test_labels, predictions, rownames=['Actual Outcome'], \
+            colnames=['Predicted Outcome']).apply(lambda r: r/r.sum(), axis=1)
 ```
 
-Augmented Decision Meta-Tree Classifier:
-Classification Accuracy on test set: 73.47%
+![Confusion Matrix](/Images/model6.PNG)
 
 # Part 4: Predicting the 2018 World Cup 
 
