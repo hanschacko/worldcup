@@ -1003,10 +1003,10 @@ Colombia wins in regulation time<br>
 round_of_8_games = np.array(winners).reshape(4,2)
 round_of_8_games
 ```
-array([['Portugal', 'Argentina'], <br>
-       ['Sweden', 'Belgium'], <br>
-       ['Spain', 'Peru'], <br>
-       ['Germany', 'Colombia']], dtype='<U9') <br>
+['Portugal', 'Argentina'] <br>
+['Sweden', 'Belgium'] <br>
+['Spain', 'Peru'] <br>
+['Germany', 'Colombia']<br>
 
 ### Comments
 1. Simulate Round of 8
@@ -1059,8 +1059,8 @@ Colombia wins in OT/PK<br>
 semifinal_games = np.array(winners).reshape(2,2)
 semifinal_games
 ```
-array([['Argentina', 'Sweden'],<br>
-       ['Spain', 'Colombia']], dtype='<U9')<br>
+['Argentina', 'Sweden']
+['Spain', 'Colombia']
        
 ### Comments
 1. Simulate Semi-Final games
@@ -1093,10 +1093,10 @@ for match in semifinal_games:
         winners.append(winning_team)
 
 ```
-Argentina vs. Sweden<br>
+[Argentina vs. Sweden]<br>
 Argentina wins in OT/PK<br>
 
-Spain vs. Colombia<br>
+[Spain vs. Colombia]<br>
 Colombia wins in OT/PK<br>
 
 ## Finals Predictions
@@ -1132,8 +1132,8 @@ else:
 
 2018 World Cup Final<br><br>
 
-Argentina vs. Spain<br>
-Spain wins in regulation time<br>
+[Argentina vs. Spain]<br>
+**Spain wins in regulation time**<br>
 
 
 # Literature Review and References
