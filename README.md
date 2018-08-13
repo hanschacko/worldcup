@@ -535,8 +535,8 @@ prediction_away_score = np.round(model_away.predict(X),0)
 model_home.summary()
 ```
 
-![Elo6](/Images/elo9.PNG)
-![Elo6](/Images/elo11.png)
+![Elo9](/Images/elo9.PNG)
+![Elo11](/Images/elo11.png)
 
 ### Comments
 1. Print Model: Away summary
@@ -545,6 +545,9 @@ model_home.summary()
 model_away.summary()
 ```
 
+![Elo12](/Images/elo12.PNG)
+![Elo13](/Images/elo13.PNG)
+
 ### Comments
 1. Residplot on home score prediction
 
@@ -552,6 +555,7 @@ model_away.summary()
 # Residplot for home score predictions
 sns.residplot(prediction_home_score,train_elo_df['home_score_x'])
 ```
+![Elo14](/Images/elo14.PNG)
 
 ### Comments
 1. Add the new features to dataframe
@@ -562,9 +566,8 @@ train_elo_df['pred_home_score'] = prediction_home_score
 train_elo_df['pred_away_score'] = prediction_away_score
 train_elo_df.head()
 ```
+![Elo15](/Images/elo15.PNG)
 
-### Comments
-1. Add ELO based score predictions as new features to dataframe
 
 ### Comments
 1. Split training set in features/labels
@@ -595,8 +598,8 @@ print('Classification Accuracy on testing set: {}%\n'.format(round(baselineModel
 ```
 
 Decision Tree Classifier:
-Classification Accuracy on training set: 74.12%
-Classification Accuracy on testing set: 72.69%
+Classification Accuracy on training set: 56.48%
+Classification Accuracy on testing set: 55.06%
 
 # Part 3: Ensemble Models
 
