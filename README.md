@@ -462,8 +462,8 @@ plt.show()
 ![Elo6](/Images/elo6.PNG)
 
 ### Comments
-1. Number of Upsets based on FIFA Rank: 53.7%
-2. Number of Upsets based on Elo Score: 20.3%
+1. Calculate number of Upsets based on FIFA Rank: 53.7%
+2. Calculate number of Upsets based on Elo Score: 20.3%
 
 ```python
 train_results_df['fifa_upsets'] = ((train_results_df.home_score_x > train_results_df.away_score_x) & \
@@ -483,14 +483,15 @@ print('Number of Upsets based on Elo Score: {}%'
       .format(round(train_results_df.elo_upsets.sum()/train_results_df.elo_upsets.count()*100, 1)))
 
 ```
+Number of Upsets based on FIFA Rank: 53.7% <br>
+Number of Upsets based on Elo Score: 20.3% <br>
 
-## Comment
-1. Generate Additional Features
+
+## More Feature Engineering
+
+### Comments
+1. Generate Additional Features : Elo Difference and Average Elo
 2. Remove features without predictive value or not known prior to game start
-3. Split training set in features/labels
-4. Using Skicit-learn to split data into training and testing sets
-5. Split the data into training and testing sets
-6. Build model and capture training and test accuracies
 
 ```python
 # generate additional features
@@ -508,6 +509,71 @@ train_elo_df = train_results_df[['neutral','home_elo_before_game','away_elo_befo
                                  'Region_North America_away','Region_South Asia_away','Region_Sub-Saharan Africa_away',
                                  'IncomeGroup_High income: nonOECD_away','IncomeGroup_Low income_away',
                                  'IncomeGroup_Lower middle income_away','IncomeGroup_Upper middle income_away','result_x']]
+                                 
+```
+### Comments
+1. Use statsmodel to do a linear regression to capture home and away scores based on the new Elo datafra,e
+2. Print Model: Home summary
+
+```python
+import statsmodels.api as sm 
+
+X = train_elo_df.drop(['home_score_x','away_score_x','result_x'], axis = 1)
+X = sm.add_constant(X)
+X = np.asarray(X, dtype='float')
+y_home = np.asarray(train_elo_df['home_score_x'], dtype='float')
+y_away = np.asarray(train_elo_df['away_score_x'], dtype='float')
+
+# Inputs to OLS model are reversed: sm.OLS(output, input)
+model_home = sm.OLS(y_home, X).fit()
+model_away = sm.OLS(y_away, X).fit()
+
+prediction_home_score = np.round(model_home.predict(X),0)
+prediction_away_score = np.round(model_away.predict(X),0)
+
+# Print out the statistics
+model_home.summary()
+```
+
+![Elo6](/Images/elo7.PNG)
+![Elo6](/Images/elo8.PNG)
+
+### Comments
+1. Print Model: Away summary
+
+```python
+model_away.summary()
+```
+
+### Comments
+1. Residplot on home score prediction
+
+```python
+# Residplot for home score predictions
+sns.residplot(prediction_home_score,train_elo_df['home_score_x'])
+```
+
+### Comments
+1. Add the new features to dataframe
+
+```python
+# Add the new features to dataframe
+train_elo_df['pred_home_score'] = prediction_home_score
+train_elo_df['pred_away_score'] = prediction_away_score
+train_elo_df.head()
+```
+
+### Comments
+1. Add ELO based score predictions as new features to dataframe
+
+### Comments
+1. Split training set in features/labels
+2. Using Skicit-learn to split data into training and testing sets
+3. Split the data into training and testing sets
+4. Build Decision Tree model and capture training and test accuracies
+
+```python
+
 
 # split training set in features/labels
 features = train_elo_df.drop(['result_x'], axis = 1)
