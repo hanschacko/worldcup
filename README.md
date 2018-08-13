@@ -288,8 +288,8 @@ print('Classification Accuracy on testing set: {}%\n'.format(round(baselineModel
 ```
 
 Decision Tree Classifier (FIFA rank only):
-Classification Accuracy on training set: 75.17%
-Classification Accuracy on testing set: 74.21%
+Classification Accuracy on training set: 56.16%<br>
+Classification Accuracy on testing set: 55.3%<br>
 
 ### Comments
 1. View the decision tree for baseline model
